@@ -204,29 +204,112 @@
 // }
 
 // app/(main)/dashboard/page.tsx
+// "use client";
+
+// import { useState, useEffect } from "react";
+// import { AnimatePresence, motion } from "framer-motion";
+// import EntryCard from "@/components/EntryCard";
+// import RecordModal from "@/components/RecordModal";
+// import TopBar from "@/components/TopBar";
+// import AddRecordModel from "@/components/AddRecordModel";
+
+// export default function DashboardPage() {
+//   const [entries, setEntries] = useState([]);
+//   const [selected, setSelected] = useState(null);
+//   const [searchQuery, setSearchQuery] = useState("");
+//   const [addRecord, setAddRecord] = useState(false);
+
+//   useEffect(() => {
+//     const data = Array.from({ length: 20 }).map((_, i) => ({
+//       id: i,
+//       name: `Record ${i + 1}`,
+//       email: `user${i + 1}@example.com`,
+//       password: "••••••••",
+//       url: "https://example.com",
+//       notes: "Secure notes",
+//     }));
+//     setEntries(data);
+//   }, []);
+
+//   const filtered = entries.filter(
+//     (e) =>
+//       e.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+//       e.email.toLowerCase().includes(searchQuery.toLowerCase())
+//   );
+
+//   return (
+//     <>
+//       <TopBar
+//         query={searchQuery}
+//         setQuery={setSearchQuery}
+//         addRecord={setAddRecord}
+//       />
+//       <main className="flex-1 overflow-auto">
+//         <motion.div
+//           initial={{ opacity: 0, scale: 0.8 }}
+//           animate={{ opacity: 1, scale: 1 }}
+//           transition={{ duration: 0.5, ease: "easeOut" }}
+//           className="p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+//         >
+//           {filtered.map((e) => (
+//             <EntryCard key={e.id} data={e} onClick={() => setSelected(e)} />
+//           ))}
+//         </motion.div>
+
+//         <AnimatePresence>
+//           {!!selected && (
+//             <RecordModal
+//               data={selected}
+//               onClose={() => setSelected(null)}
+//               onUpdate={(u) => {
+//                 setEntries((prev) => prev.map((r) => (r.id === u.id ? u : r)));
+//                 setSelected(null);
+//               }}
+//             />
+//           )}
+//         </AnimatePresence>
+//         <AnimatePresence>
+//           {!!addRecord && (
+//             <AddRecordModel onClose={() => setAddRecord(false)} />
+//           )}
+//         </AnimatePresence>
+//       </main>
+//     </>
+//   );
+// }
+
 "use client";
 
 import { useState, useEffect } from "react";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import EntryCard from "@/components/EntryCard";
 import RecordModal from "@/components/RecordModal";
+import TopBar from "@/components/TopBar";
+import AddRecordModel from "@/components/AddRecordModel";
+import MasterKeyVerify from "@/components/MasterKeyVerify";
+import { useUser } from "../UserContext";
 
 export default function DashboardPage() {
+  const { user, isKeyAvailable } = useUser();
   const [entries, setEntries] = useState([]);
   const [selected, setSelected] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [addRecord, setAddRecord] = useState(false);
 
   useEffect(() => {
-    const data = Array.from({ length: 40 }).map((_, i) => ({
-      id: i,
-      name: `Record ${i + 1}`,
-      email: `user${i + 1}@example.com`,
-      password: "••••••••",
-      url: "https://example.com",
-      notes: "Secure notes",
-    }));
-    setEntries(data);
-  }, []);
+    if (isKeyAvailable) {
+      // Simulate fetching records
+      const data = Array.from({ length: 20 }).map((_, i) => ({
+        id: i,
+        name: `Record ${i + 1}`,
+        email: `user${i + 1}@example.com`,
+        password: "••••••••",
+        url: "https://example.com",
+        notes: "Secure notes",
+      }));
+      setEntries(data);
+    }
+  }, [isKeyAvailable]);
 
   const filtered = entries.filter(
     (e) =>
@@ -234,26 +317,46 @@ export default function DashboardPage() {
       e.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  return (
+  return isKeyAvailable ? (
     <>
-      <div className="p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filtered.map((e) => (
-          <EntryCard key={e.id} data={e} onClick={() => setSelected(e)} />
-        ))}
-      </div>
+      <TopBar
+        query={searchQuery}
+        setQuery={setSearchQuery}
+        addRecord={setAddRecord}
+      />
+      <main className="flex-1 overflow-auto">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+        >
+          {filtered.map((e) => (
+            <EntryCard key={e.id} data={e} onClick={() => setSelected(e)} />
+          ))}
+        </motion.div>
 
-      <AnimatePresence>
-        {selected && (
-          <RecordModal
-            data={selected}
-            onClose={() => setSelected(null)}
-            onUpdate={(u) => {
-              setEntries((prev) => prev.map((r) => (r.id === u.id ? u : r)));
-              setSelected(null);
-            }}
-          />
-        )}
-      </AnimatePresence>
+        <AnimatePresence>
+          {!!selected && (
+            <RecordModal
+              data={selected}
+              onClose={() => setSelected(null)}
+              onUpdate={(u) => {
+                setEntries((prev) => prev.map((r) => (r.id === u.id ? u : r)));
+                setSelected(null);
+              }}
+            />
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {!!addRecord && (
+            <AddRecordModel onClose={() => setAddRecord(false)} />
+          )}
+        </AnimatePresence>
+      </main>
     </>
+  ) : (
+    <MasterKeyVerify />
   );
 }

@@ -556,13 +556,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { createUser } from "@/lib/api/auth_api";
 import { signInGoogle, signInGitHub } from "@/lib/api/oauth_api";
 import { useRouter } from "next/navigation";
 import InputField from "@/components/InputField";
-import Divider from "@/components/Divider";
 import OAuthBtn from "@/components/OAuthBtn";
+import Divider from "@/components/Divider";
 
 export default function SignUpPage() {
   const [form, setForm] = useState({
@@ -573,6 +574,7 @@ export default function SignUpPage() {
   });
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState("");
+  const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
 
@@ -601,13 +603,35 @@ export default function SignUpPage() {
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length) return setErrors(errs);
-
     try {
       setSubmitting(true);
       setApiError("");
-      const res = await createUser({ formData: form });
-      if (res.success) router.push("/dashboard");
-      else throw new Error(res.message);
+      const trimmedForm = {
+        name: form.name.trim(),
+        email: form.email.trim(),
+        password: form.password.trim(),
+      };
+      const res = await fetch(`http://localhost:8080/api/auth/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(trimmedForm),
+        credentials: "include",
+        cache: "no-store",
+      });
+      const result = await res.json();
+      if (!res.ok || !result.success) {
+        throw new Error(result.message || "Failed to create user");
+      }
+      setSuccess(true);
+      setForm({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
+      router.push("/dashboard");
     } catch (err) {
       setApiError(err.message || "Server error.");
       setTimeout(() => setApiError(""), 4000);

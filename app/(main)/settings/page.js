@@ -291,10 +291,233 @@
 //   );
 // }
 
+// "use client";
+
+// import { useState } from "react";
+// import { motion } from "framer-motion";
+// import InputField from "@/components/InputField";
+// import {
+//   updateName,
+//   updateEmail,
+//   updatePassword,
+//   deleteAccount,
+// } from "@/lib/api/user_api";
+
+// export default function Home() {
+//   // Master form state
+//   const [profile, setProfile] = useState({
+//     name: "Jane Doe",
+//     email: "jane.doe@example.com",
+//   });
+//   const [editProfile, setEditProfile] = useState(false);
+//   const [settingsForm, setSettingsForm] = useState({
+//     currentPassword: "",
+//     newPassword: "",
+//   });
+//   const [errors, setErrors] = useState({});
+//   const [message, setMessage] = useState("");
+//   const [loading, setLoading] = useState(false);
+
+//   // Handle profile field change
+//   const handleProfileChange = (e) => {
+//     const { name, value } = e.target;
+//     setProfile((p) => ({ ...p, [name]: value }));
+//     setErrors((errs) => ({ ...errs, [name]: "" }));
+//     setMessage("");
+//   };
+
+//   // Handle settings password change
+//   const handleSettingsChange = (e) => {
+//     const { name, value } = e.target;
+//     setSettingsForm((f) => ({ ...f, [name]: value }));
+//     setErrors((errs) => ({ ...errs, [name]: "" }));
+//     setMessage("");
+//   };
+
+//   // Submit profile (name/email)
+//   const submitProfile = async () => {
+//     setLoading(true);
+//     setErrors({});
+//     setMessage("");
+//     try {
+//       // First update name...
+//       let res = await updateName({ name: profile.name });
+//       if (!res.success) throw new Error(res.message);
+//       // Then update email...
+//       res = await updateEmail({ email: profile.email });
+//       if (!res.success) throw new Error(res.message);
+
+//       setMessage("✅ Profile updated.");
+//       setEditProfile(false);
+//     } catch (err) {
+//       setErrors({ general: err.message });
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   // Submit password change
+//   const submitPassword = async () => {
+//     setLoading(true);
+//     setErrors({});
+//     setMessage("");
+//     try {
+//       const res = await updatePassword(settingsForm);
+//       if (!res.success) throw new Error(res.message);
+//       setMessage("✅ Password changed.");
+//       setSettingsForm({ currentPassword: "", newPassword: "" });
+//     } catch (err) {
+//       setErrors({ general: err.message });
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   // Delete account
+//   const handleDelete = async () => {
+//     if (!confirm("Really delete your account?")) return;
+//     setLoading(true);
+//     try {
+//       const res = await deleteAccount();
+//       if (!res.success) throw new Error(res.message);
+//       // redirect or show message
+//       setMessage("✅ Account deleted.");
+//     } catch (err) {
+//       setErrors({ general: err.message });
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const fadeIn = {
+//     initial: { opacity: 0, y: 20 },
+//     animate: { opacity: 1, y: 0 },
+//     transition: { duration: 0.5, ease: "easeOut" },
+//   };
+
+//   return (
+//     <div className="relative h-full min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black flex items-center justify-center p-8 flex-1 overflow-auto">
+//       <motion.div
+//         className="z-10 w-full max-w-2xl bg-gray-800/90 backdrop-blur-md border border-gray-700 rounded-2xl p-8 space-y-10"
+//         {...fadeIn}
+//       >
+//         {/* Profile Overview */}
+//         {errors.general && (
+//           <div className="bg-red-800 text-red-200 p-3 rounded-md text-center">
+//             {errors.general}
+//           </div>
+//         )}
+//         {message && (
+//           <div className="bg-green-800 text-green-200 p-3 rounded-md text-center">
+//             {message}
+//           </div>
+//         )}
+
+//         <section className="bg-gray-700/50 p-6 rounded-xl space-y-4">
+//           <h2 className="text-xl font-semibold text-white">Profile Overview</h2>
+//           {editProfile ? (
+//             <div className="space-y-4">
+//               <InputField
+//                 label="Name"
+//                 name="name"
+//                 type="text"
+//                 value={profile.name}
+//                 onChange={handleProfileChange}
+//                 placeholder="Your name"
+//                 error={errors.name}
+//               />
+//               <InputField
+//                 label="Email"
+//                 name="email"
+//                 type="email"
+//                 value={profile.email}
+//                 onChange={handleProfileChange}
+//                 placeholder="you@example.com"
+//                 error={errors.email}
+//               />
+//               <button
+//                 onClick={submitProfile}
+//                 disabled={loading}
+//                 className="w-full py-2 bg-purple-600 text-white rounded-full hover:bg-purple-500 transition"
+//               >
+//                 Save Profile
+//               </button>
+//               <button
+//                 onClick={() => setEditProfile(false)}
+//                 className="w-full py-2 text-purple-400 rounded-full hover:underline transition"
+//               >
+//                 Cancel
+//               </button>
+//             </div>
+//           ) : (
+//             <div className="flex items-center justify-between">
+//               <div>
+//                 <p className="text-white font-medium">{profile.name}</p>
+//                 <p className="text-purple-300 text-sm">{profile.email}</p>
+//               </div>
+//               <button
+//                 onClick={() => setEditProfile(true)}
+//                 className="py-1 px-3 bg-purple-600 text-white rounded-full hover:bg-purple-500 transition"
+//               >
+//                 Edit
+//               </button>
+//             </div>
+//           )}
+//         </section>
+
+//         {/* Change Password */}
+//         <section className="bg-gray-700/50 p-6 rounded-xl space-y-4">
+//           <h2 className="text-xl font-semibold text-white">Change Password</h2>
+//           <InputField
+//             label="Current Password"
+//             name="currentPassword"
+//             type="password"
+//             value={settingsForm.currentPassword}
+//             onChange={handleSettingsChange}
+//             placeholder="••••••••"
+//             error={errors.currentPassword}
+//           />
+//           <InputField
+//             label="New Password"
+//             name="newPassword"
+//             type="password"
+//             value={settingsForm.newPassword}
+//             onChange={handleSettingsChange}
+//             placeholder="••••••••"
+//             error={errors.newPassword}
+//           />
+//           <button
+//             onClick={submitPassword}
+//             disabled={loading}
+//             className="w-full py-2 bg-purple-600 text-white rounded-full hover:bg-purple-500 transition"
+//           >
+//             Update Password
+//           </button>
+//         </section>
+
+//         {/* Delete Account */}
+//         <section className="bg-gray-700/50 p-6 rounded-xl space-y-4">
+//           <h2 className="text-xl font-semibold text-red-400">Danger Zone</h2>
+//           <p className="text-red-300 text-sm">
+//             Deleting your account is permanent. All your data will be lost.
+//           </p>
+//           <button
+//             onClick={handleDelete}
+//             disabled={loading}
+//             className="w-full py-2 bg-red-600 text-white rounded-full hover:bg-red-500 transition"
+//           >
+//             Delete Account
+//           </button>
+//         </section>
+//       </motion.div>
+//     </div>
+//   );
+// }
+
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import InputField from "@/components/InputField";
 import {
   updateName,
@@ -303,8 +526,8 @@ import {
   deleteAccount,
 } from "@/lib/api/user_api";
 
-export default function Home() {
-  // Master form state
+export default function SettingsPage() {
+  // Profile & form state
   const [profile, setProfile] = useState({
     name: "Jane Doe",
     email: "jane.doe@example.com",
@@ -315,104 +538,108 @@ export default function Home() {
     newPassword: "",
   });
   const [errors, setErrors] = useState({});
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Handle profile field change
-  const handleProfileChange = (e) => {
-    const { name, value } = e.target;
-    setProfile((p) => ({ ...p, [name]: value }));
-    setErrors((errs) => ({ ...errs, [name]: "" }));
-    setMessage("");
-  };
-
-  // Handle settings password change
-  const handleSettingsChange = (e) => {
-    const { name, value } = e.target;
-    setSettingsForm((f) => ({ ...f, [name]: value }));
-    setErrors((errs) => ({ ...errs, [name]: "" }));
-    setMessage("");
-  };
-
-  // Submit profile (name/email)
-  const submitProfile = async () => {
-    setLoading(true);
-    setErrors({});
-    setMessage("");
-    try {
-      // First update name...
-      let res = await updateName({ name: profile.name });
-      if (!res.success) throw new Error(res.message);
-      // Then update email...
-      res = await updateEmail({ email: profile.email });
-      if (!res.success) throw new Error(res.message);
-
-      setMessage("✅ Profile updated.");
-      setEditProfile(false);
-    } catch (err) {
-      setErrors({ general: err.message });
-    } finally {
-      setLoading(false);
+  // Scroll into view on expand
+  const containerRef = useRef(null);
+  useEffect(() => {
+    if (editProfile && containerRef.current) {
+      containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
     }
-  };
-
-  // Submit password change
-  const submitPassword = async () => {
-    setLoading(true);
-    setErrors({});
-    setMessage("");
-    try {
-      const res = await updatePassword(settingsForm);
-      if (!res.success) throw new Error(res.message);
-      setMessage("✅ Password changed.");
-      setSettingsForm({ currentPassword: "", newPassword: "" });
-    } catch (err) {
-      setErrors({ general: err.message });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Delete account
-  const handleDelete = async () => {
-    if (!confirm("Really delete your account?")) return;
-    setLoading(true);
-    try {
-      const res = await deleteAccount();
-      if (!res.success) throw new Error(res.message);
-      // redirect or show message
-      setMessage("✅ Account deleted.");
-    } catch (err) {
-      setErrors({ general: err.message });
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [editProfile]);
 
   const fadeIn = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.5, ease: "easeOut" },
+    transition: { duration: 0.4 },
+  };
+
+  // Helpers
+  const showMessage = (type) => {
+    setMessage({ type, text });
+    setTimeout(() => setMessage(null), 3000);
+  };
+
+  // Submits
+  const submitProfile = async () => {
+    setLoading(true);
+    setErrors({});
+    setMessage(null);
+    try {
+      let res = await updateName({ name: profile.name });
+      if (!res.success) throw new Error(res.message);
+      res = await updateEmail({ email: profile.email });
+      if (!res.success) throw new Error(res.message);
+      showMessage("success", "Profile updated.");
+      setEditProfile(false);
+    } catch (err) {
+      showMessage("error", err.message || "Update failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const submitPassword = async () => {
+    setLoading(true);
+    setErrors({});
+    setMessage(null);
+    try {
+      const res = await updatePassword(settingsForm);
+      if (!res.success) throw new Error(res.message);
+      showMessage("success", "Password changed.");
+      setSettingsForm({ currentPassword: "", newPassword: "" });
+    } catch (err) {
+      showMessage("error", err.message || "Change failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("Really delete your account?")) return;
+    setLoading(true);
+    setMessage(null);
+    try {
+      const res = await deleteAccount();
+      if (!res.success) throw new Error(res.message);
+      showMessage("success", "Account deleted.");
+      // maybe redirect here...
+    } catch (err) {
+      showMessage("error", err.message || "Delete failed.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="relative h-full min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black flex items-center justify-center p-8">
+    <div
+      ref={containerRef}
+      className="flex-1 overflow-auto p-8 bg-gradient-to-br from-gray-900 via-purple-900 to-black"
+    >
       <motion.div
-        className="z-10 w-full max-w-2xl bg-gray-800/90 backdrop-blur-md border border-gray-700 rounded-2xl p-8 space-y-10"
+        className="mx-auto max-w-2xl bg-gray-800/90 backdrop-blur-md border border-gray-700 rounded-2xl p-8 space-y-10"
         {...fadeIn}
       >
-        {/* Profile Overview */}
-        {errors.general && (
-          <div className="bg-red-800 text-red-200 p-3 rounded-md text-center">
-            {errors.general}
-          </div>
-        )}
-        {message && (
-          <div className="bg-green-800 text-green-200 p-3 rounded-md text-center">
-            {message}
-          </div>
-        )}
+        {/* global message */}
+        <AnimatePresence>
+          {message && (
+            <motion.div
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -20, opacity: 0 }}
+              className={`p-3 rounded-md text-center font-medium ${
+                message.type === "success"
+                  ? "bg-green-800 text-green-200"
+                  : "bg-red-800 text-red-200"
+              }`}
+            >
+              {message.text}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
+        {/* Profile Overview */}
         <section className="bg-gray-700/50 p-6 rounded-xl space-y-4">
           <h2 className="text-xl font-semibold text-white">Profile Overview</h2>
           {editProfile ? (
@@ -422,7 +649,9 @@ export default function Home() {
                 name="name"
                 type="text"
                 value={profile.name}
-                onChange={handleProfileChange}
+                onChange={(e) =>
+                  setProfile({ ...profile, name: e.target.value })
+                }
                 placeholder="Your name"
                 error={errors.name}
               />
@@ -431,14 +660,16 @@ export default function Home() {
                 name="email"
                 type="email"
                 value={profile.email}
-                onChange={handleProfileChange}
+                onChange={(e) =>
+                  setProfile({ ...profile, email: e.target.value })
+                }
                 placeholder="you@example.com"
                 error={errors.email}
               />
               <button
                 onClick={submitProfile}
                 disabled={loading}
-                className="w-full py-2 bg-purple-600 text-white rounded-full hover:bg-purple-500 transition"
+                className="w-full py-2 bg-purple-600 text-white rounded-full hover:bg-purple-500 transition disabled:opacity-50"
               >
                 Save Profile
               </button>
@@ -473,7 +704,12 @@ export default function Home() {
             name="currentPassword"
             type="password"
             value={settingsForm.currentPassword}
-            onChange={handleSettingsChange}
+            onChange={(e) =>
+              setSettingsForm({
+                ...settingsForm,
+                currentPassword: e.target.value,
+              })
+            }
             placeholder="••••••••"
             error={errors.currentPassword}
           />
@@ -482,14 +718,16 @@ export default function Home() {
             name="newPassword"
             type="password"
             value={settingsForm.newPassword}
-            onChange={handleSettingsChange}
+            onChange={(e) =>
+              setSettingsForm({ ...settingsForm, newPassword: e.target.value })
+            }
             placeholder="••••••••"
             error={errors.newPassword}
           />
           <button
             onClick={submitPassword}
             disabled={loading}
-            className="w-full py-2 bg-purple-600 text-white rounded-full hover:bg-purple-500 transition"
+            className="w-full py-2 bg-purple-600 text-white rounded-full hover:bg-purple-500 transition disabled:opacity-50"
           >
             Update Password
           </button>
@@ -504,7 +742,7 @@ export default function Home() {
           <button
             onClick={handleDelete}
             disabled={loading}
-            className="w-full py-2 bg-red-600 text-white rounded-full hover:bg-red-500 transition"
+            className="w-full py-2 bg-red-600 text-white rounded-full hover:bg-red-500 transition disabled:opacity-50"
           >
             Delete Account
           </button>

@@ -58,11 +58,17 @@
 //   );
 // }
 
-// components/Sidebar.tsx
+"use client";
 import Link from "next/link";
-import { HomeIcon, Cog6ToothIcon } from "@heroicons/react/24/outline";
+import {
+  HomeIcon,
+  Cog6ToothIcon,
+  ArrowRightEndOnRectangleIcon,
+} from "@heroicons/react/24/outline";
+import { usePathname } from "next/navigation";
 
 export default function SideBar() {
+  const isSettingsActive = usePathname().endsWith("/settings");
   const NavItem = ({ href, icon: Icon, label, active }) => (
     <Link
       href={href}
@@ -77,15 +83,51 @@ export default function SideBar() {
     </Link>
   );
 
+  const name = "Vishwa";
+  const email = "vishwa.kurella@gmail.com";
+  const firstLetter = name.charAt(0).toUpperCase();
+
   return (
-    <aside className="w-64 hidden md:flex flex-col bg-gray-900 p-6 space-y-8">
-      <div className="text-3xl font-bold tracking-wide uppercase text-white">
-        VaultX
+    <aside className="w-64 hidden md:flex flex-col bg-gray-900 p-6 space-y-8 justify-between">
+      <div>
+        <div className="text-3xl font-bold tracking-wide uppercase text-white">
+          VaultX
+        </div>
+        <nav className="flex flex-col space-y-4 mt-8">
+          <NavItem
+            href="/dashboard"
+            icon={HomeIcon}
+            label="Dashboard"
+            active={!isSettingsActive}
+          />
+          <NavItem
+            href="/settings"
+            icon={Cog6ToothIcon}
+            label="Settings"
+            active={isSettingsActive}
+          />
+        </nav>
       </div>
-      <nav className="flex flex-col space-y-4 mt-8">
-        <NavItem href="/dashboard" icon={HomeIcon} label="Dashboard" active />
-        <NavItem href="/settings" icon={Cog6ToothIcon} label="Settings" />
-      </nav>
+      <div className="mb-4 pt-7 border-t border-gray-700">
+        <div className="flex items-center space-x-3 ">
+          <div className="flex items-center justify-center h-10 w-10 rounded-full bg-purple-700 text-white font-semibold text-lg">
+            {firstLetter || "Guest"}
+          </div>
+          <div className="flex flex-col items-start space-y-2">
+            <span className="text-sm font-medium text-white">
+              {name || "User"}{" "}
+            </span>
+            <span className="text-xs text-gray-400">{email}</span>{" "}
+          </div>
+        </div>
+        <button
+          onClick={() => {}}
+          className="flex items-center text-lg text-red-400 hover:text-red-200 transition space-x-2 mt-4 justify-center w-full border-purple-300 border rounded-lg p-2 hover:border-purple-200"
+        >
+          <ArrowRightEndOnRectangleIcon className="w-7 h-7" />
+          <span>Logout</span>
+        </button>
+      </div>
     </aside>
   );
 }

@@ -1,5 +1,7 @@
 import { Open_Sans } from "next/font/google";
 import "./globals.css";
+import { Suspense } from "react";
+import Loading from "./Loading";
 
 const open_sans = Open_Sans({
   weight: ["300", "400", "500", "600", "700", "800"],
@@ -21,7 +23,9 @@ export default function RootLayout({ children }) {
         />
         <meta charSet="UTF-8" />
       </head>
-      <body className={`${open_sans.className} antialiased`}>{children}</body>
+      <body className={`${open_sans.className} antialiased`}>
+        <Suspense fallback={<Loading />}>{children}</Suspense>
+      </body>
     </html>
   );
 }
