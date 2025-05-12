@@ -65,7 +65,9 @@ import {
   Cog6ToothIcon,
   ArrowRightEndOnRectangleIcon,
 } from "@heroicons/react/24/outline";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { logOut } from "@/lib/api/auth_api";
+import { signOut } from "@/auth";
 
 export default function SideBar() {
   const isSettingsActive = usePathname().endsWith("/settings");
@@ -82,10 +84,27 @@ export default function SideBar() {
       <span className="text-base font-medium">{label}</span>
     </Link>
   );
-
+  const router = useRouter();
   const name = "Vishwa";
   const email = "vishwa.kurella@gmail.com";
   const firstLetter = name.charAt(0).toUpperCase();
+
+  const handleLogOut = async () => {
+    try {
+      const res = await fetch("/api/auth/logout", {
+        method: "GET",
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (data.success) {
+        router.replace("/");
+      } else {
+        console.error("Logout failed:", data);
+      }
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
 
   return (
     <aside className="w-64 hidden md:flex flex-col bg-gray-900 p-6 space-y-8 justify-between">
@@ -121,7 +140,7 @@ export default function SideBar() {
           </div>
         </div>
         <button
-          onClick={() => {}}
+          onClick={handleLogOut}
           className="flex items-center text-lg text-red-400 hover:text-red-200 transition space-x-2 mt-4 justify-center w-full border-purple-300 border rounded-lg p-2 hover:border-purple-200"
         >
           <ArrowRightEndOnRectangleIcon className="w-7 h-7" />

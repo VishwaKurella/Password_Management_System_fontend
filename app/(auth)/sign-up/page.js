@@ -556,9 +556,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { createUser } from "@/lib/api/auth_api";
 import { signInGoogle, signInGitHub } from "@/lib/api/oauth_api";
 import { useRouter } from "next/navigation";
 import InputField from "@/components/InputField";
@@ -631,7 +629,9 @@ export default function SignUpPage() {
         password: "",
         confirmPassword: "",
       });
-      router.push("/dashboard");
+      setTimeout(() => {
+        router.push(`/otp-verify/${result._id}`);
+      }, 1000);
     } catch (err) {
       setApiError(err.message || "Server error.");
       setTimeout(() => setApiError(""), 4000);
@@ -658,6 +658,19 @@ export default function SignUpPage() {
             className="mb-4 p-3 bg-red-800 text-red-200 rounded-md text-center"
           >
             {apiError}
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {success && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="mb-4 p-3 rounded-md bg-green-900 text-green-200 text-center shadow-md"
+          >
+            ✅ Account created. OTP has been sent — redirecting to
+            verification...
           </motion.div>
         )}
       </AnimatePresence>

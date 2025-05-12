@@ -530,17 +530,24 @@ export default function SignInPage() {
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length) return setErrors(errs);
-
     try {
       setSubmitting(true);
       setApiError("");
-      const res = await login({ formData: form });
-      if (res.success) {
-        setSuccess(true);
-        setTimeout(() => router.push("/dashboard"), 1500);
-      } else {
-        throw new Error(res.message);
+      let res = await fetch(`http://localhost:8080/api/auth/signin`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+        credentials: "include",
+        cache: "no-store",
+      });
+      const result = await res.json();
+      if (!res.ok || !result.success) {
+        throw new Error(result.message || "Failed to sign in user");
       }
+      setSuccess(true);
+      setTimeout(() => router.push("/dashboard"), 1500);
     } catch (err) {
       setApiError(err.message || "Server error.");
       setTimeout(() => setApiError(""), 4000);

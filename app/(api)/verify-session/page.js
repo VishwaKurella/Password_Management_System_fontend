@@ -92,24 +92,55 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { LockClosedIcon } from "@heroicons/react/24/outline";
-import { authenticate } from "@/lib/api/auth_api";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
-  const [status, setStatus] = useState("pending"); // "pending" | "success" | "error"
-  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState("pending");
+  const [message, setMessage] = useState("Hello");
 
   useEffect(() => {
     const verifySession = async () => {
       try {
-        const res = await authenticate();
-        if (res.success) {
-          setStatus("success");
-          setMessage("✅ Session verified. Redirecting to your vault...");
-          setTimeout(() => router.replace("/dashboard"), 1500);
-        } else {
-          throw new Error(res.message || "Authentication failed");
+        const res = await fetch("/api/verify-session", {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        const sessionRes = await res.json();
+
+        if (!res.ok || !sessionRes.success) {
+          throw new Error(sessionRes.message || "Unable to verify session.");
         }
+
+        const user_data = sessionRes.user;
+        delete user_data.image;
+        console.log(user_data);
+        if (!user_data) {
+          throw new Error("Unable to login user. Please try again.");
+        }
+        const authRes = await fetch(
+          `http://localhost:8080/api/auth/authenticate`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(user_data),
+            credentials: "include",
+            cache: "no-store",
+          }
+        );
+        const result = await authRes.json();
+
+        if (!authRes.ok || !result.success) {
+          throw new Error(
+            result.message || "Unable to login user. Please try again."
+          );
+        }
+        setStatus("success");
+        setMessage("✅ Session verified. Redirecting to your vault...");
+        setTimeout(() => router.replace("/dashboard"), 1500);
       } catch (err) {
         setStatus("error");
         setMessage(err.message || "Unexpected error occurred");
