@@ -526,6 +526,36 @@ export default function SignInPage() {
     return errs;
   };
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   const errs = validate();
+  //   if (Object.keys(errs).length) return setErrors(errs);
+  //   try {
+  //     setSubmitting(true);
+  //     setApiError("");
+  //     let res = await fetch(`http://localhost:8080/api/auth/signin`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(form),
+  //       credentials: "include",
+  //       cache: "no-store",
+  //     });
+  //     const result = await res.json();
+  //     if (!res.ok || !result.success) {
+  //       throw new Error(result.message || "Failed to sign in user");
+  //     }
+  //     setSuccess(true);
+  //     setTimeout(() => router.push("/dashboard"), 1500);
+  //   } catch (err) {
+  //     setApiError(err.message || "Server error.");
+  //     setTimeout(() => setApiError(""), 4000);
+  //   } finally {
+  //     setSubmitting(false);
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const errs = validate();
@@ -533,7 +563,7 @@ export default function SignInPage() {
     try {
       setSubmitting(true);
       setApiError("");
-      let res = await fetch(`http://localhost:8080/api/auth/signin`, {
+      const res = await fetch("http://localhost:8080/api/auth/signin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -543,11 +573,18 @@ export default function SignInPage() {
         cache: "no-store",
       });
       const result = await res.json();
+
       if (!res.ok || !result.success) {
         throw new Error(result.message || "Failed to sign in user");
       }
+
       setSuccess(true);
-      setTimeout(() => router.push("/dashboard"), 1500);
+
+      if (!result.is_verified) {
+        setTimeout(() => router.push(`/verify-otp/${result._id}`), 1500);
+      } else {
+        setTimeout(() => router.push("/dashboard"), 1500);
+      }
     } catch (err) {
       setApiError(err.message || "Server error.");
       setTimeout(() => setApiError(""), 4000);
