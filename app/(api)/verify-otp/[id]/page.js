@@ -88,7 +88,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import InputField from "@/components/InputField";
 
@@ -97,9 +97,7 @@ export default function OtpVerify() {
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const id = searchParams.get("id");
-
+  const { id } = useParams();
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!otp || otp.length !== 6) {
@@ -111,17 +109,20 @@ export default function OtpVerify() {
     setStatus("submitting");
     setMessage("Verifying...");
     try {
+      const form = { _id: id, secret: otp };
+      console.log(form);
       const res = await fetch("http://localhost:8080/api/verify/otp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ _id: id, secret: otp }),
+        body: JSON.stringify(form),
         credentials: "include",
         cache: "no-store",
       });
 
       const data = await res.json();
+      console.log(data);
 
       if (!data.success) {
         throw new Error(data.message || "Invalid OTP");

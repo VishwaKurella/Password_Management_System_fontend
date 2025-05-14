@@ -562,6 +562,11 @@ import { useRouter } from "next/navigation";
 import InputField from "@/components/InputField";
 import OAuthBtn from "@/components/OAuthBtn";
 import Divider from "@/components/Divider";
+import {
+  ArrowPathIcon,
+  CheckIcon,
+  UserPlusIcon,
+} from "@heroicons/react/24/outline";
 
 export default function SignUpPage() {
   const [form, setForm] = useState({
@@ -629,8 +634,9 @@ export default function SignUpPage() {
         password: "",
         confirmPassword: "",
       });
+      console.log(result._id);
       setTimeout(() => {
-        router.push(`/otp-verify/${result._id}`);
+        router.push(`/verify-otp/${result._id}`);
       }, 1000);
     } catch (err) {
       setApiError(err.message || "Server error.");
@@ -649,7 +655,7 @@ export default function SignUpPage() {
         </p>
       </div>
 
-      <AnimatePresence>
+      {/* <AnimatePresence>
         {apiError && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -657,6 +663,19 @@ export default function SignUpPage() {
             exit={{ opacity: 0, y: -10 }}
             className="mb-4 p-3 bg-red-800 text-red-200 rounded-md text-center"
           >
+            {apiError}
+          </motion.div>
+        )}
+      </AnimatePresence> */}
+      <AnimatePresence>
+        {apiError && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="mb-4 p-3 bg-red-800 text-red-200 rounded-md text-center flex items-center justify-center gap-2"
+          >
+            <ExclamationCircleIcon className="h-5 w-5" />
             {apiError}
           </motion.div>
         )}
@@ -669,8 +688,8 @@ export default function SignUpPage() {
             exit={{ opacity: 0, y: -10 }}
             className="mb-4 p-3 rounded-md bg-green-900 text-green-200 text-center shadow-md"
           >
-            ✅ Account created. OTP has been sent — redirecting to
-            verification...
+            <CheckIcon className="inline-block w-5 h-5 text-emerald-400 bg-emerald-900 border border-emerald-600 rounded-full p-1 mr-2" />
+            Account created. OTP has been sent — redirecting to verification...
           </motion.div>
         )}
       </AnimatePresence>
@@ -713,7 +732,7 @@ export default function SignUpPage() {
           error={errors.confirmPassword}
         />
 
-        <button
+        {/* <button
           type="submit"
           disabled={submitting}
           className={`w-full py-3 text-white rounded-full font-medium transition ${
@@ -723,6 +742,27 @@ export default function SignUpPage() {
           }`}
         >
           {submitting ? "Creating account…" : "Create Account"}
+        </button> */}
+        <button
+          type="submit"
+          disabled={submitting}
+          className={`w-full py-3 text-white rounded-full font-medium transition flex items-center justify-center gap-2 ${
+            submitting
+              ? "bg-purple-700 opacity-60 cursor-not-allowed"
+              : "bg-purple-600 hover:bg-purple-500"
+          }`}
+        >
+          {submitting ? (
+            <>
+              <ArrowPathIcon className="h-5 w-5 animate-spin" />
+              Creating account…
+            </>
+          ) : (
+            <>
+              <UserPlusIcon className="h-5 w-5" />
+              Create Account
+            </>
+          )}
         </button>
       </form>
 

@@ -491,12 +491,17 @@
 // app/sign-in/page.tsx
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { LockClosedIcon } from "@heroicons/react/24/outline";
-import { login } from "@/lib/api/auth_api";
+import {
+  ArrowPathIcon,
+  ArrowRightCircleIcon,
+  CheckCircleIcon,
+  EnvelopeIcon,
+  ExclamationCircleIcon,
+  LockClosedIcon,
+} from "@heroicons/react/24/outline";
 import { signInGoogle, signInGitHub } from "@/lib/api/oauth_api";
 import { useRouter } from "next/navigation";
 import OAuthBtn from "@/components/OAuthBtn";
@@ -509,6 +514,7 @@ export default function SignInPage() {
   const [apiError, setApiError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
   const router = useRouter();
 
   const handleChange = (e) => {
@@ -583,6 +589,7 @@ export default function SignInPage() {
       if (!result.is_verified) {
         setTimeout(() => router.push(`/verify-otp/${result._id}`), 1500);
       } else {
+        setIsVerified(true);
         setTimeout(() => router.push("/dashboard"), 1500);
       }
     } catch (err) {
@@ -605,7 +612,7 @@ export default function SignInPage() {
         </p>
       </div>
 
-      <AnimatePresence>
+      {/* <AnimatePresence>
         {apiError && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -616,9 +623,23 @@ export default function SignInPage() {
             {apiError}
           </motion.div>
         )}
+      </AnimatePresence> */}
+
+      <AnimatePresence>
+        {apiError && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="mb-4 p-3 bg-red-800 text-red-200 rounded-md text-center flex items-center justify-center gap-2"
+          >
+            <ExclamationCircleIcon className="h-5 w-5" />
+            {apiError}
+          </motion.div>
+        )}
       </AnimatePresence>
 
-      {success ? (
+      {/* {success ? (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -626,7 +647,40 @@ export default function SignInPage() {
         >
           <p className="font-semibold">✅ Login Successful</p>
           <p>Redirecting to your dashboard…</p>
-        </motion.div>
+        </motion.div> */}
+      {success ? (
+        isVerified ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="p-6 bg-green-800 text-green-200 rounded-xl text-center space-y-2"
+          >
+            <div className="flex justify-center">
+              <CheckCircleIcon className="h-10 w-10 text-green-400" />
+            </div>
+            <p className="text-lg font-semibold">Login Successful</p>
+            <p className="text-sm text-green-100">
+              Redirecting to your dashboard…
+            </p>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="p-6 bg-blue-900 text-blue-200 rounded-xl text-center space-y-2"
+          >
+            <div className="flex justify-center gap-2">
+              <EnvelopeIcon className="h-6 w-6 text-blue-300" />
+              <p className="text-base font-medium">
+                OTP sent to your email for verification.
+              </p>
+            </div>
+            <div className="flex justify-center gap-2 text-sm text-blue-100">
+              <ArrowPathIcon className="h-5 w-5 animate-spin" />
+              <p>Redirecting to OTP verification…</p>
+            </div>
+          </motion.div>
+        )
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
           <InputField
@@ -648,17 +702,39 @@ export default function SignInPage() {
             error={errors.password}
           />
 
-          <button
+          {/* <button
             type="submit"
             disabled={submitting}
-            className={`w-full py-3 mt-4 text-white rounded-full font-medium transition ${
+            className={`w-full py-3 mt-4 text-white rounded-full font-medium transition${
               submitting
                 ? "bg-purple-700 opacity-60 cursor-not-allowed"
                 : "bg-purple-600 hover:bg-purple-500"
             }`}
           >
             {submitting ? "Signing in…" : "Sign In"}
+          </button> */}
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className={`w-full py-3 mt-4 text-white rounded-full font-medium transition flex items-center justify-center gap-2 ${
+              submitting
+                ? "bg-purple-700 opacity-60 cursor-not-allowed"
+                : "bg-purple-600 hover:bg-purple-500"
+            }`}
+          >
+            <ArrowRightCircleIcon className="h-5 w-5" />
+            {submitting ? "Signing in…" : "Sign In"}
           </button>
+
+          <div className="text-right text-sm mt-1">
+            <Link
+              href="/forgot-password"
+              className="text-purple-300 hover:text-white hover:underline transition"
+            >
+              Forgot password?
+            </Link>
+          </div>
 
           <Divider text="Or continue with" />
 
