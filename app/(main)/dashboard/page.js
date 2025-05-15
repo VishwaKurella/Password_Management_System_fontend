@@ -798,7 +798,14 @@ export default function DashboardPage() {
 
         <AnimatePresence>
           {!!addRecord && (
-            <AddRecordModel onClose={() => setAddRecord(false)} />
+            // <AddRecordModel onClose={() => setAddRecord(false)} />
+            <AddRecordModel
+              onClose={() => setAddRecord(false)}
+              onCreate={(newEnc) => {
+                // append to encrypted entries so it decrypts on next effect
+                setEntries((prev) => [...prev, newEnc]);
+              }}
+            />
           )}
         </AnimatePresence>
       </main>
