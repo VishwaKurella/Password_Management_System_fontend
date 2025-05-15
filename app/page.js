@@ -1020,7 +1020,7 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="py-8 bg-gray-900 border-t border-gray-800 text-center text-sm text-purple-400">
-        © 2025 VaultX. All rights reserved.
+        &copy; {new Date().getFullYear()} VaultX. All rights reserved.
       </footer>
     </div>
   );
