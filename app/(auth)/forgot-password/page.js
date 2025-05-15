@@ -175,12 +175,16 @@ export default function ForgotPasswordPage() {
     setErrors({});
     setSubmitting(true);
     try {
-      const res = await fetch("/api/auth/forgot_password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim() }),
-      });
+      const res = await fetch(
+        "http://localhost:8080/api/auth/forgot_password",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email.trim().toLowerCase() }),
+        }
+      );
       const data = await res.json();
+      console.log("hello", data);
       if (!res.ok || !data.success) {
         setErrors({
           email: data.message || "Failed to send OTP. Please try again.",
@@ -188,7 +192,7 @@ export default function ForgotPasswordPage() {
       } else {
         setOtpId(data._id);
         setSubmitted(true);
-        setTimeout(() => router.push(`/verify-otp/${data._id}`), 3000);
+        setTimeout(() => router.push(`/verify-otp/${otpId}`), 3000);
       }
     } catch (error) {
       console.error("Error during forgot-password request:", error);
@@ -242,7 +246,7 @@ export default function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={submitting}
-              className={`w-full px-6 py-3 bg-purple-600 rounded-full font-medium hover:bg-purple-700 transition flex items-center justify-center gap-2 ${
+              className={`w-full px-6 py-3 text-white bg-purple-600 rounded-full font-medium hover:bg-purple-700 transition flex items-center justify-center gap-2 ${
                 submitting ? "opacity-50 cursor-not-allowed" : ""
               }`}
             >
