@@ -155,7 +155,6 @@ export default function ForgotPasswordPage() {
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [otpId, setOtpId] = useState("");
 
   const validate = () => {
     const errs = {};
@@ -184,15 +183,13 @@ export default function ForgotPasswordPage() {
         }
       );
       const data = await res.json();
-      console.log("hello", data);
       if (!res.ok || !data.success) {
         setErrors({
           email: data.message || "Failed to send OTP. Please try again.",
         });
       } else {
-        setOtpId(data._id);
         setSubmitted(true);
-        setTimeout(() => router.push(`/verify-otp/${otpId}`), 3000);
+        setTimeout(() => router.push(`/verify-otp/${data.id}`), 3000);
       }
     } catch (error) {
       console.error("Error during forgot-password request:", error);
