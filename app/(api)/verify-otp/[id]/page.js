@@ -139,9 +139,8 @@ export default function OtpVerify() {
           : data.issued_for === "ForResetMasterKey"
           ? `/set-masterkey/${id}`
           : "/";
-
       setTimeout(() => {
-        router.replace(target);
+        router.push(target);
       }, 1500);
     } catch (err) {
       setStatus("error");
