@@ -523,19 +523,31 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
-import { useUser } from "../UserContext";
+import { useUser } from "@/app/(main)/UserContext";
 
 // helper: base64url encode/decode
 const toBase64Url = (buffer) => {
   const b64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
   return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 };
+// const fromBase64Url = (str) => {
+//   const pad = 4 - (str.length % 4);
+//   const b64 = (str + "=".repeat(pad)).replace(/-/g, "+").replace(/_/g, "/");
+//   const bin = atob(b64);
+//   const arr = new Uint8Array(bin.length);
+//   for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+//   return arr;
+//   };
+// correct base64url → Uint8Array
 const fromBase64Url = (str) => {
-  const pad = 4 - (str.length % 4);
-  const b64 = (str + "=".repeat(pad)).replace(/-/g, "+").replace(/_/g, "/");
+  // only pad when needed
+  const pad = str.length % 4 === 0 ? 0 : 4 - (str.length % 4);
+  const b64 = str.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat(pad);
   const bin = atob(b64);
   const arr = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  for (let i = 0; i < bin.length; i++) {
+    arr[i] = bin.charCodeAt(i);
+  }
   return arr;
 };
 
@@ -607,14 +619,18 @@ export default function AddRecordModal({ onClose, onCreate }) {
       const dataB64 = toBase64Url(cipherBuffer);
       const ivB64 = toBase64Url(iv);
 
-      const res = await fetch("/api/request/create_entries", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ data: dataB64, nonce: ivB64 }),
-      });
+      const res = await fetch(
+        "http://localhost:8080/api/request/create_entries",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ data: dataB64, nonce: ivB64 }),
+        }
+      );
 
       const json = await res.json();
+      console.log("hello", json);
 
       if (res.status === 401 || json.is_expired) {
         setStatus("error");

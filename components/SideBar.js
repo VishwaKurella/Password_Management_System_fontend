@@ -66,8 +66,7 @@ import {
   ArrowRightEndOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 import { usePathname, useRouter } from "next/navigation";
-import { logOut } from "@/lib/api/auth_api";
-import { signOut } from "@/auth";
+import { useUser } from "@/app/(main)/UserContext";
 
 export default function SideBar() {
   const isSettingsActive = usePathname().endsWith("/settings");
@@ -85,8 +84,9 @@ export default function SideBar() {
     </Link>
   );
   const router = useRouter();
-  const name = "Vishwa";
-  const email = "vishwa.kurella@gmail.com";
+  const { user } = useUser();
+  const name = user.name;
+  const email = user.email;
   const firstLetter = name.charAt(0).toUpperCase();
 
   const handleLogOut = async () => {
