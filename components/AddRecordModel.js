@@ -523,7 +523,7 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
-import { useUser } from "../UserContext";
+import { useUser } from "../app/(main)/UserContext";
 
 // helper: base64url encode/decode
 const toBase64Url = (buffer) => {
