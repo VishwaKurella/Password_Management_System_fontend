@@ -27,7 +27,7 @@ const fromBase64Url = (str) => {
   return arr;
 };
 
-export default function EditOrDeleteModal({ record, onClose, onUpdate, onDelete }) {
+export default function RecordModel({ record, onClose, onUpdate, onDelete }) {
   const { key, setKey, setMasterKeySet } = useUser();
   const [form, setForm] = useState({
     name: record.name,
