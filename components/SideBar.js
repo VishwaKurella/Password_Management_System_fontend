@@ -85,9 +85,6 @@ export default function SideBar() {
   );
   const router = useRouter();
   const { user } = useUser();
-  const name = user.name;
-  const email = user.email;
-  const firstLetter = name.charAt(0).toUpperCase();
 
   const handleLogOut = async () => {
     try {
@@ -128,17 +125,19 @@ export default function SideBar() {
         </nav>
       </div>
       <div className="mb-4 pt-7 border-t border-gray-700">
-        <div className="flex items-center space-x-3 ">
-          <div className="flex items-center justify-center h-10 w-10 rounded-full bg-purple-700 text-white font-semibold text-lg">
-            {firstLetter || "Guest"}
+        {!!user && (
+          <div className="flex items-center space-x-3 ">
+            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-purple-700 text-white font-semibold text-lg">
+              {user.name?.charAt(0).toUpperCase()}
+            </div>
+            <div className="flex flex-col items-start space-y-2">
+              <span className="text-sm font-medium text-white">
+                {user.name}{" "}
+              </span>
+              <span className="text-xs text-gray-400">{user.email}</span>{" "}
+            </div>
           </div>
-          <div className="flex flex-col items-start space-y-2">
-            <span className="text-sm font-medium text-white">
-              {name || "User"}{" "}
-            </span>
-            <span className="text-xs text-gray-400">{email}</span>{" "}
-          </div>
-        </div>
+        )}
         <button
           onClick={handleLogOut}
           className="flex items-center text-lg text-red-400 hover:text-red-200 transition space-x-2 mt-4 justify-center w-full border-purple-300 border rounded-lg p-2 hover:border-purple-200"

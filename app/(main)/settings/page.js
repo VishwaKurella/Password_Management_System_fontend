@@ -514,67 +514,531 @@
 //   );
 // }
 
+// "use client";
+
+// import { useState, useRef, useEffect } from "react";
+// import { motion, AnimatePresence } from "framer-motion";
+// import InputField from "@/components/InputField";
+// import {
+//   updateName,
+//   updateEmail,
+//   updatePassword,
+//   deleteAccount,
+// } from "@/lib/api/user_api";
+
+// export default function SettingsPage() {
+//   // Profile & form state
+//   const [profile, setProfile] = useState({
+//     name: "Jane Doe",
+//     email: "jane.doe@example.com",
+//   });
+//   const [editProfile, setEditProfile] = useState(false);
+//   const [settingsForm, setSettingsForm] = useState({
+//     currentPassword: "",
+//     newPassword: "",
+//   });
+//   const [errors, setErrors] = useState({});
+//   const [message, setMessage] = useState(null);
+//   const [loading, setLoading] = useState(false);
+
+//   // Scroll into view on expand
+//   const containerRef = useRef(null);
+//   useEffect(() => {
+//     if (editProfile && containerRef.current) {
+//       containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+//     }
+//   }, [editProfile]);
+
+//   const fadeIn = {
+//     initial: { opacity: 0, y: 20 },
+//     animate: { opacity: 1, y: 0 },
+//     transition: { duration: 0.4 },
+//   };
+
+//   // Helpers
+//   const showMessage = (type) => {
+//     setMessage({ type, text });
+//     setTimeout(() => setMessage(null), 3000);
+//   };
+
+//   // Submits
+//   const submitProfile = async () => {
+//     setLoading(true);
+//     setErrors({});
+//     setMessage(null);
+//     try {
+//       let res = await updateName({ name: profile.name });
+//       if (!res.success) throw new Error(res.message);
+//       res = await updateEmail({ email: profile.email });
+//       if (!res.success) throw new Error(res.message);
+//       showMessage("success", "Profile updated.");
+//       setEditProfile(false);
+//     } catch (err) {
+//       showMessage("error", err.message || "Update failed.");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const submitPassword = async () => {
+//     setLoading(true);
+//     setErrors({});
+//     setMessage(null);
+//     try {
+//       const res = await updatePassword(settingsForm);
+//       if (!res.success) throw new Error(res.message);
+//       showMessage("success", "Password changed.");
+//       setSettingsForm({ currentPassword: "", newPassword: "" });
+//     } catch (err) {
+//       showMessage("error", err.message || "Change failed.");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const handleDelete = async () => {
+//     if (!confirm("Really delete your account?")) return;
+//     setLoading(true);
+//     setMessage(null);
+//     try {
+//       const res = await deleteAccount();
+//       if (!res.success) throw new Error(res.message);
+//       showMessage("success", "Account deleted.");
+//       // maybe redirect here...
+//     } catch (err) {
+//       showMessage("error", err.message || "Delete failed.");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div
+//       ref={containerRef}
+//       className="flex-1 overflow-auto p-8 bg-gradient-to-br from-gray-900 via-purple-900 to-black"
+//     >
+//       <motion.div
+//         className="mx-auto max-w-2xl bg-gray-800/90 backdrop-blur-md border border-gray-700 rounded-2xl p-8 space-y-10"
+//         {...fadeIn}
+//       >
+//         {/* global message */}
+//         <AnimatePresence>
+//           {message && (
+//             <motion.div
+//               initial={{ y: -20, opacity: 0 }}
+//               animate={{ y: 0, opacity: 1 }}
+//               exit={{ y: -20, opacity: 0 }}
+//               className={`p-3 rounded-md text-center font-medium ${
+//                 message.type === "success"
+//                   ? "bg-green-800 text-green-200"
+//                   : "bg-red-800 text-red-200"
+//               }`}
+//             >
+//               {message.text}
+//             </motion.div>
+//           )}
+//         </AnimatePresence>
+
+//         {/* Profile Overview */}
+//         <section className="bg-gray-700/50 p-6 rounded-xl space-y-4">
+//           <h2 className="text-xl font-semibold text-white">Profile Overview</h2>
+//           {editProfile ? (
+//             <div className="space-y-4">
+//               <InputField
+//                 label="Name"
+//                 name="name"
+//                 type="text"
+//                 value={profile.name}
+//                 onChange={(e) =>
+//                   setProfile({ ...profile, name: e.target.value })
+//                 }
+//                 placeholder="Your name"
+//                 error={errors.name}
+//               />
+//               <InputField
+//                 label="Email"
+//                 name="email"
+//                 type="email"
+//                 value={profile.email}
+//                 onChange={(e) =>
+//                   setProfile({ ...profile, email: e.target.value })
+//                 }
+//                 placeholder="you@example.com"
+//                 error={errors.email}
+//               />
+//               <button
+//                 onClick={submitProfile}
+//                 disabled={loading}
+//                 className="w-full py-2 bg-purple-600 text-white rounded-full hover:bg-purple-500 transition disabled:opacity-50"
+//               >
+//                 Save Profile
+//               </button>
+//               <button
+//                 onClick={() => setEditProfile(false)}
+//                 className="w-full py-2 text-purple-400 rounded-full hover:underline transition"
+//               >
+//                 Cancel
+//               </button>
+//             </div>
+//           ) : (
+//             <div className="flex items-center justify-between">
+//               <div>
+//                 <p className="text-white font-medium">{profile.name}</p>
+//                 <p className="text-purple-300 text-sm">{profile.email}</p>
+//               </div>
+//               <button
+//                 onClick={() => setEditProfile(true)}
+//                 className="py-1 px-3 bg-purple-600 text-white rounded-full hover:bg-purple-500 transition"
+//               >
+//                 Edit
+//               </button>
+//             </div>
+//           )}
+//         </section>
+
+//         {/* Change Password */}
+//         <section className="bg-gray-700/50 p-6 rounded-xl space-y-4">
+//           <h2 className="text-xl font-semibold text-white">Change Password</h2>
+//           <InputField
+//             label="Current Password"
+//             name="currentPassword"
+//             type="password"
+//             value={settingsForm.currentPassword}
+//             onChange={(e) =>
+//               setSettingsForm({
+//                 ...settingsForm,
+//                 currentPassword: e.target.value,
+//               })
+//             }
+//             placeholder="••••••••"
+//             error={errors.currentPassword}
+//           />
+//           <InputField
+//             label="New Password"
+//             name="newPassword"
+//             type="password"
+//             value={settingsForm.newPassword}
+//             onChange={(e) =>
+//               setSettingsForm({ ...settingsForm, newPassword: e.target.value })
+//             }
+//             placeholder="••••••••"
+//             error={errors.newPassword}
+//           />
+//           <button
+//             onClick={submitPassword}
+//             disabled={loading}
+//             className="w-full py-2 bg-purple-600 text-white rounded-full hover:bg-purple-500 transition disabled:opacity-50"
+//           >
+//             Update Password
+//           </button>
+//         </section>
+
+//         {/* Delete Account */}
+//         <section className="bg-gray-700/50 p-6 rounded-xl space-y-4">
+//           <h2 className="text-xl font-semibold text-red-400">Danger Zone</h2>
+//           <p className="text-red-300 text-sm">
+//             Deleting your account is permanent. All your data will be lost.
+//           </p>
+//           <button
+//             onClick={handleDelete}
+//             disabled={loading}
+//             className="w-full py-2 bg-red-600 text-white rounded-full hover:bg-red-500 transition disabled:opacity-50"
+//           >
+//             Delete Account
+//           </button>
+//         </section>
+//       </motion.div>
+//     </div>
+//   );
+// }
+
+// "use client";
+
+// import { useState, useRef, useEffect } from "react";
+// import { motion, AnimatePresence } from "framer-motion";
+// import InputField from "@/components/InputField";
+// import {
+//   UserIcon,
+//   LockClosedIcon,
+//   TrashIcon,
+//   CheckCircleIcon,
+//   ExclamationTriangleIcon,
+// } from "@heroicons/react/24/outline";
+// import { useUser } from "../UserContext";
+
+// export default function SettingsPage() {
+//   const { user } = useUser(); // { name, email }
+//   const [profile, setProfile] = useState(user || { name: "", email: "" });
+//   const [editingName, setEditingName] = useState(false);
+//   const [form, setForm] = useState({ currentPassword: "", newPassword: "" });
+//   const [status, setStatus] = useState({ type: "idle", message: "" });
+//   const [loading, setLoading] = useState(false);
+//   const containerRef = useRef(null);
+
+//   // Sync profile when user context updates
+//   useEffect(() => {
+//     if (user) setProfile(user);
+//   }, [user]);
+
+//   // Scroll when editing name
+//   useEffect(() => {
+//     if (editingName && containerRef.current) {
+//       containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+//     }
+//   }, [editingName]);
+
+//   const showMessage = (type, message) => {
+//     setStatus({ type, message });
+//     setTimeout(() => setStatus({ type: "idle", message: "" }), 4000);
+//   };
+
+//   const submitName = async () => {
+//     setLoading(true);
+//     try {
+//       const res = await fetch("/api/user/name", {
+//         method: "PATCH",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ name: profile.name }),
+//       });
+//       const data = await res.json();
+//       if (!data.success) throw new Error(data.message);
+//       showMessage("success", "Name updated successfully.");
+//       setEditingName(false);
+//     } catch (err) {
+//       showMessage("error", err.message);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const submitPassword = async () => {
+//     setLoading(true);
+//     try {
+//       const res = await fetch("/api/user/password", {
+//         method: "PATCH",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify(form),
+//       });
+//       const data = await res.json();
+//       if (!data.success) throw new Error(data.message);
+//       showMessage("success", "Password changed successfully.");
+//       setForm({ currentPassword: "", newPassword: "" });
+//     } catch (err) {
+//       showMessage("error", err.message);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const confirmAndDelete = async () => {
+//     if (
+//       !confirm(
+//         "Are you sure you want to delete your account? This cannot be undone."
+//       )
+//     )
+//       return;
+//     setLoading(true);
+//     try {
+//       const res = await fetch("/api/user", { method: "DELETE" });
+//       const data = await res.json();
+//       if (!data.success) throw new Error(data.message);
+//       showMessage("success", "Account deleted.");
+//       window.location.href = "/";
+//     } catch (err) {
+//       showMessage("error", err.message);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div
+//       ref={containerRef}
+//       className="flex-1 overflow-auto bg-gradient-to-br from-gray-900 via-purple-900 to-black p-8 text-gray-100"
+//     >
+//       <AnimatePresence>
+//         {status.type !== "idle" && (
+//           <motion.div
+//             initial={{ y: -20, opacity: 0 }}
+//             animate={{ y: 0, opacity: 1 }}
+//             exit={{ y: -20, opacity: 0 }}
+//             className={`mb-6 flex items-center gap-2 p-4 rounded-md font-medium ${
+//               status.type === "success"
+//                 ? "bg-green-800 text-green-200"
+//                 : "bg-red-800 text-red-200"
+//             }`}
+//           >
+//             {status.type === "success" ? (
+//               <CheckCircleIcon className="h-6 w-6" />
+//             ) : (
+//               <ExclamationTriangleIcon className="h-6 w-6" />
+//             )}
+//             <span>{status.message}</span>
+//           </motion.div>
+//         )}
+//       </AnimatePresence>
+
+//       <div className="space-y-12 max-w-3xl mx-auto">
+//         {/* Profile Section */}
+//         <section className="bg-gray-800/80 backdrop-blur-md border border-gray-700 rounded-2xl p-6 flex items-start gap-6 shadow-lg">
+//           <UserIcon className="h-10 w-10 text-purple-400" />
+//           <div className="flex-1 space-y-2">
+//             <h2 className="text-xl font-semibold text-white">Profile</h2>
+//             {editingName ? (
+//               <>
+//                 <InputField
+//                   label="Name"
+//                   name="name"
+//                   type="text"
+//                   value={profile.name}
+//                   onChange={(e) =>
+//                     setProfile({ ...profile, name: e.target.value })
+//                   }
+//                 />
+//                 <div className="flex gap-4 mt-2">
+//                   <button
+//                     onClick={submitName}
+//                     disabled={loading}
+//                     className="px-5 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-500 transition disabled:opacity-50"
+//                   >
+//                     Save
+//                   </button>
+//                   <button
+//                     onClick={() => setEditingName(false)}
+//                     className="px-5 py-2 text-purple-400 rounded-full hover:underline transition"
+//                   >
+//                     Cancel
+//                   </button>
+//                 </div>
+//               </>
+//             ) : (
+//               <div className="flex justify-between items-center">
+//                 <div>
+//                   <p className="text-white font-medium text-lg">
+//                     {profile.name}
+//                   </p>
+//                   <p className="text-purple-300 text-sm">{profile.email}</p>
+//                 </div>
+//                 <button
+//                   onClick={() => setEditingName(true)}
+//                   className="px-4 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-500 transition"
+//                 >
+//                   Edit
+//                 </button>
+//               </div>
+//             )}
+//           </div>
+//         </section>
+
+//         {/* Change Password Section */}
+//         <section className="bg-gray-800/80 backdrop-blur-md border border-gray-700 rounded-2xl p-6 flex items-start gap-6 shadow-lg">
+//           <LockClosedIcon className="h-10 w-10 text-purple-400 mt-1" />
+//           <div className="flex-1">
+//             <h2 className="text-xl font-semibold text-white mb-3">
+//               Change Password
+//             </h2>
+//             <div className="space-y-4">
+//               <InputField
+//                 label="Current Password"
+//                 name="currentPassword"
+//                 type="password"
+//                 value={form.currentPassword}
+//                 onChange={(e) =>
+//                   setForm({ ...form, currentPassword: e.target.value })
+//                 }
+//               />
+//               <InputField
+//                 label="New Password"
+//                 name="newPassword"
+//                 type="password"
+//                 value={form.newPassword}
+//                 onChange={(e) =>
+//                   setForm({ ...form, newPassword: e.target.value })
+//                 }
+//               />
+//               <button
+//                 onClick={submitPassword}
+//                 disabled={loading}
+//                 className="px-5 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-500 transition disabled:opacity-50"
+//               >
+//                 Update
+//               </button>
+//             </div>
+//           </div>
+//         </section>
+
+//         {/* Delete Account Section */}
+//         <section className="bg-gray-800/80 backdrop-blur-md border border-red-700 rounded-2xl p-6 flex items-start gap-6 shadow-lg">
+//           <TrashIcon className="h-10 w-10 text-red-400 mt-1" />
+//           <div className="flex-1">
+//             <h2 className="text-xl font-semibold text-red-400 mb-2">
+//               Delete Account
+//             </h2>
+//             <p className="text-red-300 text-sm mb-4">
+//               This action is irreversible. All your data will be permanently
+//               deleted.
+//             </p>
+//             <button
+//               onClick={confirmAndDelete}
+//               disabled={loading}
+//               className="px-5 py-2 bg-red-600 text-white rounded-full hover:bg-red-500 transition disabled:opacity-50"
+//             >
+//               Delete
+//             </button>
+//           </div>
+//         </section>
+//       </div>
+//     </div>
+//   );
+// }
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import InputField from "@/components/InputField";
 import {
-  updateName,
-  updateEmail,
-  updatePassword,
-  deleteAccount,
-} from "@/lib/api/user_api";
+  UserIcon,
+  LockClosedIcon,
+  TrashIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+} from "@heroicons/react/24/outline";
+import { useUser } from "../UserContext";
 
 export default function SettingsPage() {
-  // Profile & form state
-  const [profile, setProfile] = useState({
-    name: "Jane Doe",
-    email: "jane.doe@example.com",
-  });
-  const [editProfile, setEditProfile] = useState(false);
-  const [settingsForm, setSettingsForm] = useState({
-    currentPassword: "",
-    newPassword: "",
-  });
-  const [errors, setErrors] = useState({});
-  const [message, setMessage] = useState(null);
+  const { user, setUser } = useUser();
+  const [editingName, setEditingName] = useState(false);
+  const [form, setForm] = useState({ currentPassword: "", newPassword: "" });
+  const [status, setStatus] = useState({ type: "idle", message: "" });
   const [loading, setLoading] = useState(false);
-
-  // Scroll into view on expand
   const containerRef = useRef(null);
+
   useEffect(() => {
-    if (editProfile && containerRef.current) {
+    if (editingName && containerRef.current) {
       containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
     }
-  }, [editProfile]);
+  }, [editingName]);
 
-  const fadeIn = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.4 },
+  const showMessage = (type, message) => {
+    setStatus({ type, message });
+    setTimeout(() => setStatus({ type: "idle", message: "" }), 4000);
   };
 
-  // Helpers
-  const showMessage = (type) => {
-    setMessage({ type, text });
-    setTimeout(() => setMessage(null), 3000);
-  };
-
-  // Submits
-  const submitProfile = async () => {
+  const submitName = async () => {
     setLoading(true);
-    setErrors({});
-    setMessage(null);
     try {
-      let res = await updateName({ name: profile.name });
-      if (!res.success) throw new Error(res.message);
-      res = await updateEmail({ email: profile.email });
-      if (!res.success) throw new Error(res.message);
-      showMessage("success", "Profile updated.");
-      setEditProfile(false);
+      const res = await fetch("/api/user/change-name", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: user.name }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      showMessage("success", "Name updated successfully.");
+      setEditingName(false);
+      setUser({ ...user, name: data.name });
     } catch (err) {
-      showMessage("error", err.message || "Update failed.");
+      showMessage("error", err.message);
     } finally {
       setLoading(false);
     }
@@ -582,172 +1046,185 @@ export default function SettingsPage() {
 
   const submitPassword = async () => {
     setLoading(true);
-    setErrors({});
-    setMessage(null);
     try {
-      const res = await updatePassword(settingsForm);
-      if (!res.success) throw new Error(res.message);
-      showMessage("success", "Password changed.");
-      setSettingsForm({ currentPassword: "", newPassword: "" });
+      const res = await fetch("/api/user/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      showMessage("success", "Password changed successfully.");
+      setForm({ currentPassword: "", newPassword: "" });
     } catch (err) {
-      showMessage("error", err.message || "Change failed.");
+      showMessage("error", err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async () => {
-    if (!confirm("Really delete your account?")) return;
+  const confirmAndDelete = async () => {
+    if (
+      !confirm(
+        "Are you sure you want to delete your account? This cannot be undone."
+      )
+    )
+      return;
     setLoading(true);
-    setMessage(null);
     try {
-      const res = await deleteAccount();
-      if (!res.success) throw new Error(res.message);
+      const res = await fetch("/api/user/delete-account", { method: "DELETE" });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
       showMessage("success", "Account deleted.");
-      // maybe redirect here...
+      window.location.href = "/";
     } catch (err) {
-      showMessage("error", err.message || "Delete failed.");
+      showMessage("error", err.message);
     } finally {
       setLoading(false);
     }
   };
+
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center h-64 text-white">
+        <div className="loader" />
+      </div>
+    );
+  }
 
   return (
     <div
       ref={containerRef}
-      className="flex-1 overflow-auto p-8 bg-gradient-to-br from-gray-900 via-purple-900 to-black"
+      className="flex-1 overflow-auto bg-gradient-to-br from-gray-900 via-purple-900 to-black p-6 sm:p-8 text-gray-100"
     >
-      <motion.div
-        className="mx-auto max-w-2xl bg-gray-800/90 backdrop-blur-md border border-gray-700 rounded-2xl p-8 space-y-10"
-        {...fadeIn}
-      >
-        {/* global message */}
-        <AnimatePresence>
-          {message && (
-            <motion.div
-              initial={{ y: -20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -20, opacity: 0 }}
-              className={`p-3 rounded-md text-center font-medium ${
-                message.type === "success"
-                  ? "bg-green-800 text-green-200"
-                  : "bg-red-800 text-red-200"
-              }`}
-            >
-              {message.text}
-            </motion.div>
-          )}
-        </AnimatePresence>
+      <AnimatePresence>
+        {status.type !== "idle" && (
+          <motion.div
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -20, opacity: 0 }}
+            className={`mb-6 flex items-center gap-2 p-4 rounded-md font-medium ${
+              status.type === "success"
+                ? "bg-green-800 text-green-200"
+                : "bg-red-800 text-red-200"
+            }`}
+          >
+            {status.type === "success" ? (
+              <CheckCircleIcon className="h-6 w-6" />
+            ) : (
+              <ExclamationTriangleIcon className="h-6 w-6" />
+            )}
+            <span>{status.message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        {/* Profile Overview */}
-        <section className="bg-gray-700/50 p-6 rounded-xl space-y-4">
-          <h2 className="text-xl font-semibold text-white">Profile Overview</h2>
-          {editProfile ? (
+      <div className="space-y-10 max-w-3xl mx-auto">
+        {/* Profile Section */}
+        <section className="bg-gray-800/70 backdrop-blur-md border border-gray-700 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+          <UserIcon className="h-10 w-10 text-purple-400 shrink-0" />
+          <div className="flex-1">
+            <h2 className="text-xl font-semibold text-white mb-2">Profile</h2>
+            {editingName ? (
+              <div className="space-y-4">
+                <InputField
+                  label="Name"
+                  name="name"
+                  type="text"
+                  value={user.name}
+                  onChange={(e) => setUser({ ...user, name: e.target.value })}
+                />
+                <div className="flex gap-3">
+                  <button
+                    onClick={submitName}
+                    disabled={loading}
+                    className="px-5 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-500 transition disabled:opacity-50"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setEditingName(false)}
+                    className="px-5 py-2 text-purple-400 rounded-full hover:underline transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                <div>
+                  <p className="text-white font-medium">{user.name}</p>
+                  <p className="text-purple-300 text-sm">{user.email}</p>
+                </div>
+                <button
+                  onClick={() => setEditingName(true)}
+                  className="mt-3 sm:mt-0 px-4 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-500 transition"
+                >
+                  Edit
+                </button>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Change Password Section */}
+        <section className="bg-gray-800/70 backdrop-blur-md border border-gray-700 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-start gap-4">
+          <LockClosedIcon className="h-10 w-10 text-purple-400 mt-1 shrink-0" />
+          <div className="flex-1">
+            <h2 className="text-xl font-semibold text-white mb-2">
+              Change Password
+            </h2>
             <div className="space-y-4">
               <InputField
-                label="Name"
-                name="name"
-                type="text"
-                value={profile.name}
+                label="Current Password"
+                name="currentPassword"
+                type="password"
+                value={form.currentPassword}
                 onChange={(e) =>
-                  setProfile({ ...profile, name: e.target.value })
+                  setForm({ ...form, currentPassword: e.target.value })
                 }
-                placeholder="Your name"
-                error={errors.name}
               />
               <InputField
-                label="Email"
-                name="email"
-                type="email"
-                value={profile.email}
+                label="New Password"
+                name="newPassword"
+                type="password"
+                value={form.newPassword}
                 onChange={(e) =>
-                  setProfile({ ...profile, email: e.target.value })
+                  setForm({ ...form, newPassword: e.target.value })
                 }
-                placeholder="you@example.com"
-                error={errors.email}
               />
               <button
-                onClick={submitProfile}
+                onClick={submitPassword}
                 disabled={loading}
-                className="w-full py-2 bg-purple-600 text-white rounded-full hover:bg-purple-500 transition disabled:opacity-50"
+                className="px-5 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-500 transition disabled:opacity-50"
               >
-                Save Profile
-              </button>
-              <button
-                onClick={() => setEditProfile(false)}
-                className="w-full py-2 text-purple-400 rounded-full hover:underline transition"
-              >
-                Cancel
+                Update
               </button>
             </div>
-          ) : (
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-white font-medium">{profile.name}</p>
-                <p className="text-purple-300 text-sm">{profile.email}</p>
-              </div>
-              <button
-                onClick={() => setEditProfile(true)}
-                className="py-1 px-3 bg-purple-600 text-white rounded-full hover:bg-purple-500 transition"
-              >
-                Edit
-              </button>
-            </div>
-          )}
+          </div>
         </section>
 
-        {/* Change Password */}
-        <section className="bg-gray-700/50 p-6 rounded-xl space-y-4">
-          <h2 className="text-xl font-semibold text-white">Change Password</h2>
-          <InputField
-            label="Current Password"
-            name="currentPassword"
-            type="password"
-            value={settingsForm.currentPassword}
-            onChange={(e) =>
-              setSettingsForm({
-                ...settingsForm,
-                currentPassword: e.target.value,
-              })
-            }
-            placeholder="••••••••"
-            error={errors.currentPassword}
-          />
-          <InputField
-            label="New Password"
-            name="newPassword"
-            type="password"
-            value={settingsForm.newPassword}
-            onChange={(e) =>
-              setSettingsForm({ ...settingsForm, newPassword: e.target.value })
-            }
-            placeholder="••••••••"
-            error={errors.newPassword}
-          />
-          <button
-            onClick={submitPassword}
-            disabled={loading}
-            className="w-full py-2 bg-purple-600 text-white rounded-full hover:bg-purple-500 transition disabled:opacity-50"
-          >
-            Update Password
-          </button>
+        {/* Delete Account Section */}
+        <section className="bg-gray-800/70 backdrop-blur-md border border-red-700 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-start gap-4">
+          <TrashIcon className="h-10 w-10 text-red-400 mt-1 shrink-0" />
+          <div className="flex-1">
+            <h2 className="text-xl font-semibold text-red-400 mb-2">
+              Delete Account
+            </h2>
+            <p className="text-red-300 text-sm mb-4">
+              This action is irreversible. All your data will be permanently
+              deleted.
+            </p>
+            <button
+              onClick={confirmAndDelete}
+              disabled={loading}
+              className="px-5 py-2 bg-red-600 text-white rounded-full hover:bg-red-500 transition disabled:opacity-50"
+            >
+              Delete
+            </button>
+          </div>
         </section>
-
-        {/* Delete Account */}
-        <section className="bg-gray-700/50 p-6 rounded-xl space-y-4">
-          <h2 className="text-xl font-semibold text-red-400">Danger Zone</h2>
-          <p className="text-red-300 text-sm">
-            Deleting your account is permanent. All your data will be lost.
-          </p>
-          <button
-            onClick={handleDelete}
-            disabled={loading}
-            className="w-full py-2 bg-red-600 text-white rounded-full hover:bg-red-500 transition disabled:opacity-50"
-          >
-            Delete Account
-          </button>
-        </section>
-      </motion.div>
+      </div>
     </div>
   );
 }

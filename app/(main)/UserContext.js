@@ -8,7 +8,7 @@ import SetMasterKeyModel from "@/components/SetMasterKeyModel";
 const UserContext = createContext(null);
 
 export function UserProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState({ name: "", email: "", id: "" });
   const [isSessionExpired, setIsSessionExpired] = useState(false);
   const [masterKeySet, setMasterKeySet] = useState(false);
   const [key, setKey] = useState(false);
