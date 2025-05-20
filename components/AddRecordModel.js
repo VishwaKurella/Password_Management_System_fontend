@@ -512,6 +512,549 @@
 //   );
 // }
 
+// "use client";
+
+// import { useState } from "react";
+// import { motion, AnimatePresence } from "framer-motion";
+// import InputField from "@/components/InputField";
+// import {
+//   XMarkIcon,
+//   Cog6ToothIcon,
+//   CheckCircleIcon,
+//   ExclamationTriangleIcon,
+// } from "@heroicons/react/24/outline";
+// import { useUser } from "@/app/(main)/UserContext";
+
+// // helper: base64url encode/decode
+// const toBase64Url = (buffer) => {
+//   const b64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+//   return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+// };
+// // const fromBase64Url = (str) => {
+// //   const pad = 4 - (str.length % 4);
+// //   const b64 = (str + "=".repeat(pad)).replace(/-/g, "+").replace(/_/g, "/");
+// //   const bin = atob(b64);
+// //   const arr = new Uint8Array(bin.length);
+// //   for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+// //   return arr;
+// //   };
+// // correct base64url → Uint8Array
+// const fromBase64Url = (str) => {
+//   // only pad when needed
+//   const pad = str.length % 4 === 0 ? 0 : 4 - (str.length % 4);
+//   const b64 = str.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat(pad);
+//   const bin = atob(b64);
+//   const arr = new Uint8Array(bin.length);
+//   for (let i = 0; i < bin.length; i++) {
+//     arr[i] = bin.charCodeAt(i);
+//   }
+//   return arr;
+// };
+
+// export default function AddRecordModal({ onClose, onCreate }) {
+//   const { key, setKey, setMasterKeySet } = useUser();
+//   const [form, setForm] = useState({
+//     name: "",
+//     email: "",
+//     password: "",
+//     url: "",
+//     notes: "",
+//   });
+//   const [errors, setErrors] = useState({});
+//   const [status, setStatus] = useState("idle");
+//   const [message, setMessage] = useState("");
+
+//   const handleChange = (e) => {
+//     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+//     setErrors((errs) => ({ ...errs, [e.target.name]: "" }));
+//   };
+
+//   const validate = () => {
+//     const errs = {};
+//     if (!form.name.trim()) errs.name = "Name is required";
+//     if (!/^\S+@\S+\.\S+$/.test(form.email))
+//       errs.email = "Valid email is required";
+//     if (form.password.length < 8) errs.password = "Minimum 8 characters";
+//     if (!/^https?:\/\//.test(form.url))
+//       errs.url = "Must start with http:// or https://";
+//     return errs;
+//   };
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     if (status === "submitting") return;
+
+//     const v = validate();
+//     if (Object.keys(v).length) {
+//       setErrors(v);
+//       return;
+//     }
+
+//     if (!key) {
+//       setMasterKeySet(false);
+//       return;
+//     }
+
+//     setStatus("submitting");
+//     setMessage("");
+
+//     try {
+//       const rawKey = fromBase64Url(key);
+//       const cryptoKey = await window.crypto.subtle.importKey(
+//         "raw",
+//         rawKey,
+//         { name: "AES-GCM" },
+//         false,
+//         ["encrypt"]
+//       );
+
+//       const plaintext = new TextEncoder().encode(JSON.stringify(form));
+//       const iv = window.crypto.getRandomValues(new Uint8Array(12));
+//       const cipherBuffer = await window.crypto.subtle.encrypt(
+//         { name: "AES-GCM", iv },
+//         cryptoKey,
+//         plaintext
+//       );
+
+//       const dataB64 = toBase64Url(cipherBuffer);
+//       const ivB64 = toBase64Url(iv);
+
+//       const res = await fetch(
+//         "http://localhost:8080/api/request/create_entries",
+//         {
+//           method: "POST",
+//           headers: { "Content-Type": "application/json" },
+//           credentials: "include",
+//           body: JSON.stringify({ data: dataB64, nonce: ivB64 }),
+//         }
+//       );
+
+//       const json = await res.json();
+//       console.log("hello", json);
+
+//       if (res.status === 401 || json.is_expired) {
+//         setStatus("error");
+//         setMessage(json.message || "Session expired");
+//         setTimeout(() => {
+//           setMasterKeySet(false);
+//           setKey(null);
+//         }, 1000);
+//         return;
+//       }
+
+//       if (!res.ok || !json.success) {
+//         throw new Error(json.message || "Server error");
+//       }
+
+//       const newId = json.id;
+//       setStatus("success");
+//       setMessage("Record created!");
+//       onCreate({
+//         ...form,
+//         id: newId,
+//         cipherText: dataB64,
+//         nonce: ivB64,
+//       });
+//       setTimeout(onClose, 1200);
+//     } catch (err) {
+//       console.error("Create entry failed:", err);
+//       setStatus("error");
+//       setMessage(err.message || "Failed to create");
+//       setTimeout(() => setStatus("idle"), 1500);
+//     }
+//   };
+
+//   const StatusBanner = () => {
+//     const icons = {
+//       submitting: (
+//         <Cog6ToothIcon className="h-5 w-5 animate-spin inline-block mr-2" />
+//       ),
+//       success: (
+//         <CheckCircleIcon className="h-5 w-5 text-green-400 inline-block mr-2" />
+//       ),
+//       error: (
+//         <ExclamationTriangleIcon className="h-5 w-5 text-red-400 inline-block mr-2" />
+//       ),
+//     };
+//     const colors = {
+//       submitting: "bg-yellow-800 text-yellow-200",
+//       success: "bg-green-800 text-green-200",
+//       error: "bg-red-800 text-red-200",
+//     };
+//     return (
+//       <motion.div
+//         initial={{ y: -20, opacity: 0 }}
+//         animate={{ y: 0, opacity: 1 }}
+//         exit={{ y: -20, opacity: 0 }}
+//         className={`mb-4 p-3 rounded-md text-center text-sm font-medium ${colors[status]}`}
+//       >
+//         {icons[status]}
+//         {status === "submitting" ? "Saving…" : message}
+//       </motion.div>
+//     );
+//   };
+
+//   return (
+//     <motion.div
+//       className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
+//       initial={{ opacity: 0 }}
+//       animate={{ opacity: 1 }}
+//       exit={{ opacity: 0 }}
+//     >
+//       <motion.div
+//         className="w-full max-w-lg bg-gray-900 border border-gray-700 rounded-2xl p-8 shadow-2xl text-white relative"
+//         initial={{ scale: 0.9, opacity: 0 }}
+//         animate={{ scale: 1, opacity: 1 }}
+//         exit={{ scale: 0.9, opacity: 0 }}
+//       >
+//         <button
+//           onClick={onClose}
+//           className="absolute top-4 right-4 text-gray-400 hover:text-red-400 transition"
+//           aria-label="Close"
+//           type="button"
+//         >
+//           <XMarkIcon className="h-6 w-6" />
+//         </button>
+
+//         <h2 className="text-2xl font-semibold text-purple-400 mb-6">
+//           Add New Record
+//         </h2>
+
+//         <AnimatePresence>
+//           {status !== "idle" && <StatusBanner />}
+//         </AnimatePresence>
+
+//         <form className="space-y-4" onSubmit={handleSubmit}>
+//           <InputField
+//             label="Record Name"
+//             name="name"
+//             type="text"
+//             value={form.name}
+//             onChange={handleChange}
+//             placeholder="e.g. GitHub"
+//             error={errors.name}
+//           />
+//           <InputField
+//             label="Email"
+//             name="email"
+//             type="email"
+//             value={form.email}
+//             onChange={handleChange}
+//             placeholder="you@example.com"
+//             error={errors.email}
+//           />
+//           <InputField
+//             label="Password"
+//             name="password"
+//             type="password"
+//             value={form.password}
+//             onChange={handleChange}
+//             placeholder="Strong password"
+//             error={errors.password}
+//           />
+//           <InputField
+//             label="Website URL"
+//             name="url"
+//             type="url"
+//             value={form.url}
+//             onChange={handleChange}
+//             placeholder="https://example.com"
+//             error={errors.url}
+//           />
+
+//           <div className="flex flex-col">
+//             <label
+//               htmlFor="notes"
+//               className="mb-1 text-sm text-purple-300 tracking-wider"
+//             >
+//               Notes
+//             </label>
+//             <textarea
+//               id="notes"
+//               name="notes"
+//               value={form.notes}
+//               onChange={handleChange}
+//               rows={3}
+//               className="px-4 py-2 rounded-xl bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-600 transition-all duration-200"
+//               placeholder="Additional context (optional)"
+//             />
+//           </div>
+
+//           <button
+//             type="submit"
+//             disabled={status === "submitting"}
+//             className="w-full py-2 bg-purple-700 hover:bg-purple-600 rounded-full font-semibold text-white transition duration-200 disabled:opacity-50"
+//           >
+//             Create Record
+//           </button>
+//         </form>
+//       </motion.div>
+//     </motion.div>
+//   );
+// }
+
+// "use client";
+
+// import { useState } from "react";
+// import { motion, AnimatePresence } from "framer-motion";
+// import InputField from "@/components/InputField";
+// import {
+//   XMarkIcon,
+//   Cog6ToothIcon,
+//   CheckCircleIcon,
+//   ExclamationTriangleIcon,
+// } from "@heroicons/react/24/outline";
+// import { useUser } from "@/app/(main)/UserContext";
+
+// // base64url helpers
+// const toBase64Url = (buffer) => {
+//   const b64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+//   return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+// };
+// const fromBase64Url = (str) => {
+//   const pad = str.length % 4 === 0 ? 0 : 4 - (str.length % 4);
+//   const b64 = str.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat(pad);
+//   const bin = atob(b64);
+//   const arr = new Uint8Array(bin.length);
+//   for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+//   return arr;
+// };
+
+// export default function AddRecordModal({ onClose, onCreate }) {
+//   const { key, setKey, setMasterKeySet, secureFetch } = useUser();
+
+//   const [form, setForm] = useState({
+//     name: "",
+//     email: "",
+//     password: "",
+//     url: "",
+//     notes: "",
+//   });
+//   const [errors, setErrors] = useState({});
+//   const [status, setStatus] = useState("idle"); // idle | submitting | success | error
+//   const [message, setMessage] = useState("");
+
+//   const handleChange = (e) => {
+//     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+//     setErrors((errs) => ({ ...errs, [e.target.name]: "" }));
+//     if (status !== "idle") {
+//       setStatus("idle");
+//       setMessage("");
+//     }
+//   };
+
+//   const validate = () => {
+//     const errs = {};
+//     if (!form.name.trim()) errs.name = "Name is required";
+//     if (!/^\S+@\S+\.\S+$/.test(form.email))
+//       errs.email = "Valid email is required";
+//     if (form.password.length < 8) errs.password = "Minimum 8 characters";
+//     if (form.url && !/^https?:\/\//.test(form.url))
+//       errs.url = "Must start with http:// or https://";
+//     return errs;
+//   };
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     if (status === "submitting") return;
+
+//     const v = validate();
+//     if (Object.keys(v).length) {
+//       setErrors(v);
+//       return;
+//     }
+//     if (!key) {
+//       setMasterKeySet(false);
+//       return;
+//     }
+
+//     setStatus("submitting");
+//     setMessage("");
+
+//     try {
+//       // import key
+//       const rawKey = fromBase64Url(key);
+//       const cryptoKey = await window.crypto.subtle.importKey(
+//         "raw",
+//         rawKey,
+//         { name: "AES-GCM" },
+//         false,
+//         ["encrypt"]
+//       );
+
+//       // encrypt
+//       const encoder = new TextEncoder();
+//       const dataBuffer = encoder.encode(JSON.stringify(form));
+//       const iv = window.crypto.getRandomValues(new Uint8Array(12));
+//       const cipherBuffer = await window.crypto.subtle.encrypt(
+//         { name: "AES-GCM", iv },
+//         cryptoKey,
+//         dataBuffer
+//       );
+//       const dataB64 = toBase64Url(cipherBuffer);
+//       const ivB64 = toBase64Url(iv);
+
+//       const { json } = await secureFetch(
+//         "http://localhost:8080/api/request/create_entries",
+//         {
+//           method: "POST",
+//           headers: { "Content-Type": "application/json" },
+//           body: JSON.stringify({ data: dataB64, nonce: ivB64 }),
+//         }
+//       );
+//       if (!json.success) {
+//         if (json.is_expired) {
+//           setStatus("error");
+//           setMessage(json.message || "Session expired");
+//           setTimeout(() => setIsSessionExpired(true), 1000);
+//           return;
+//         }
+//         throw new Error(json.message || "Invalid master key");
+//       }
+
+//       setStatus("success");
+//       setMessage("Record created!");
+//       onCreate({
+//         ...form,
+//         id: json.id,
+//         cipherText: dataB64,
+//         nonce: ivB64,
+//       });
+//       setTimeout(onClose, 1200);
+//     } catch (err) {
+//       console.error("Create entry failed:", err);
+//       setStatus("error");
+//       setMessage(err.message || "Failed to create");
+//       setTimeout(() => setStatus("idle"), 1500);
+//     }
+//   };
+
+//   const StatusBanner = () => {
+//     const icons = {
+//       submitting: (
+//         <Cog6ToothIcon className="h-5 w-5 animate-spin inline-block mr-2" />
+//       ),
+//       success: (
+//         <CheckCircleIcon className="h-5 w-5 text-green-400 inline-block mr-2" />
+//       ),
+//       error: (
+//         <ExclamationTriangleIcon className="h-5 w-5 text-red-400 inline-block mr-2" />
+//       ),
+//     };
+//     const colors = {
+//       submitting: "bg-yellow-800 text-yellow-200",
+//       success: "bg-green-800 text-green-200",
+//       error: "bg-red-800 text-red-200",
+//     };
+//     return (
+//       <motion.div
+//         initial={{ y: -20, opacity: 0 }}
+//         animate={{ y: 0, opacity: 1 }}
+//         exit={{ y: -20, opacity: 0 }}
+//         className={`mb-4 p-3 rounded-md text-center text-sm font-medium ${colors[status]}`}
+//       >
+//         {icons[status]}
+//         {status === "submitting" ? "Saving…" : message}
+//       </motion.div>
+//     );
+//   };
+
+//   return (
+//     <motion.div
+//       className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
+//       initial={{ opacity: 0 }}
+//       animate={{ opacity: 1 }}
+//       exit={{ opacity: 0 }}
+//     >
+//       <motion.div
+//         className="w-full max-w-lg bg-gray-900 border border-gray-700 rounded-2xl p-8 shadow-2xl text-white relative"
+//         initial={{ scale: 0.9, opacity: 0 }}
+//         animate={{ scale: 1, opacity: 1 }}
+//         exit={{ scale: 0.9, opacity: 0 }}
+//       >
+//         <button
+//           onClick={onClose}
+//           className="absolute top-4 right-4 text-gray-400 hover:text-red-400 transition"
+//           aria-label="Close"
+//           type="button"
+//         >
+//           <XMarkIcon className="h-6 w-6" />
+//         </button>
+
+//         <h2 className="text-2xl font-semibold text-purple-400 mb-6">
+//           Add New Record
+//         </h2>
+//         <AnimatePresence>
+//           {status !== "idle" && <StatusBanner />}
+//         </AnimatePresence>
+
+//         <form className="space-y-4" onSubmit={handleSubmit}>
+//           <InputField
+//             label="Record Name"
+//             name="name"
+//             type="text"
+//             value={form.name}
+//             onChange={handleChange}
+//             placeholder="e.g. GitHub"
+//             error={errors.name}
+//           />
+//           <InputField
+//             label="Email"
+//             name="email"
+//             type="email"
+//             value={form.email}
+//             onChange={handleChange}
+//             placeholder="you@example.com"
+//             error={errors.email}
+//           />
+//           <InputField
+//             label="Password"
+//             name="password"
+//             type="password"
+//             value={form.password}
+//             onChange={handleChange}
+//             placeholder="Strong password"
+//             error={errors.password}
+//           />
+//           <InputField
+//             label="Website URL"
+//             name="url"
+//             type="url"
+//             value={form.url}
+//             onChange={handleChange}
+//             placeholder="https://example.com"
+//             error={errors.url}
+//           />
+//           <div className="flex flex-col">
+//             <label
+//               htmlFor="notes"
+//               className="mb-1 text-sm text-purple-300 tracking-wider"
+//             >
+//               Notes
+//             </label>
+//             <textarea
+//               id="notes"
+//               name="notes"
+//               value={form.notes}
+//               onChange={handleChange}
+//               rows={3}
+//               className="px-4 py-2 rounded-xl bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-600 transition-all duration-200"
+//               placeholder="Additional context (optional)"
+//             />
+//           </div>
+//           <button
+//             type="submit"
+//             disabled={status === "submitting"}
+//             className="w-full py-2 bg-purple-700 hover:bg-purple-600 rounded-full font-semibold text-white transition duration-200 disabled:opacity-50"
+//           >
+//             {status === "submitting" ? "Saving…" : "Create Record"}
+//           </button>
+//         </form>
+//       </motion.div>
+//     </motion.div>
+//   );
+// }
+
 "use client";
 
 import { useState } from "react";
@@ -522,37 +1065,28 @@ import {
   Cog6ToothIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
+  EyeIcon,
+  EyeSlashIcon,
 } from "@heroicons/react/24/outline";
 import { useUser } from "@/app/(main)/UserContext";
 
-// helper: base64url encode/decode
+// base64url helpers
 const toBase64Url = (buffer) => {
   const b64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
   return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 };
-// const fromBase64Url = (str) => {
-//   const pad = 4 - (str.length % 4);
-//   const b64 = (str + "=".repeat(pad)).replace(/-/g, "+").replace(/_/g, "/");
-//   const bin = atob(b64);
-//   const arr = new Uint8Array(bin.length);
-//   for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-//   return arr;
-//   };
-// correct base64url → Uint8Array
 const fromBase64Url = (str) => {
-  // only pad when needed
   const pad = str.length % 4 === 0 ? 0 : 4 - (str.length % 4);
   const b64 = str.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat(pad);
   const bin = atob(b64);
   const arr = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) {
-    arr[i] = bin.charCodeAt(i);
-  }
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
   return arr;
 };
 
-export default function AddRecordModal({ onClose, onCreate }) {
-  const { key, setKey, setMasterKeySet } = useUser();
+export default function AddRecordModel({ onClose, onCreate }) {
+  const { key, setKey, setMasterKeySet, secureFetch } = useUser();
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -561,12 +1095,17 @@ export default function AddRecordModal({ onClose, onCreate }) {
     notes: "",
   });
   const [errors, setErrors] = useState({});
-  const [status, setStatus] = useState("idle");
+  const [status, setStatus] = useState("idle"); // idle | submitting | success | error
   const [message, setMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // ← new
 
   const handleChange = (e) => {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
     setErrors((errs) => ({ ...errs, [e.target.name]: "" }));
+    if (status !== "idle") {
+      setStatus("idle");
+      setMessage("");
+    }
   };
 
   const validate = () => {
@@ -575,7 +1114,7 @@ export default function AddRecordModal({ onClose, onCreate }) {
     if (!/^\S+@\S+\.\S+$/.test(form.email))
       errs.email = "Valid email is required";
     if (form.password.length < 8) errs.password = "Minimum 8 characters";
-    if (!/^https?:\/\//.test(form.url))
+    if (form.url && !/^https?:\/\//.test(form.url))
       errs.url = "Must start with http:// or https://";
     return errs;
   };
@@ -589,7 +1128,6 @@ export default function AddRecordModal({ onClose, onCreate }) {
       setErrors(v);
       return;
     }
-
     if (!key) {
       setMasterKeySet(false);
       return;
@@ -599,6 +1137,7 @@ export default function AddRecordModal({ onClose, onCreate }) {
     setMessage("");
 
     try {
+      // import key
       const rawKey = fromBase64Url(key);
       const cryptoKey = await window.crypto.subtle.importKey(
         "raw",
@@ -608,50 +1147,41 @@ export default function AddRecordModal({ onClose, onCreate }) {
         ["encrypt"]
       );
 
-      const plaintext = new TextEncoder().encode(JSON.stringify(form));
+      // encrypt
+      const encoder = new TextEncoder();
+      const dataBuffer = encoder.encode(JSON.stringify(form));
       const iv = window.crypto.getRandomValues(new Uint8Array(12));
       const cipherBuffer = await window.crypto.subtle.encrypt(
         { name: "AES-GCM", iv },
         cryptoKey,
-        plaintext
+        dataBuffer
       );
-
       const dataB64 = toBase64Url(cipherBuffer);
       const ivB64 = toBase64Url(iv);
 
-      const res = await fetch(
+      const { json } = await secureFetch(
         "http://localhost:8080/api/request/create_entries",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          credentials: "include",
           body: JSON.stringify({ data: dataB64, nonce: ivB64 }),
         }
       );
-
-      const json = await res.json();
-      console.log("hello", json);
-
-      if (res.status === 401 || json.is_expired) {
-        setStatus("error");
-        setMessage(json.message || "Session expired");
-        setTimeout(() => {
-          setMasterKeySet(false);
-          setKey(null);
-        }, 1000);
-        return;
+      if (!json.success) {
+        if (json.is_expired) {
+          setStatus("error");
+          setMessage(json.message || "Session expired");
+          setTimeout(() => setIsSessionExpired(true), 1000);
+          return;
+        }
+        throw new Error(json.message || "Invalid master key");
       }
 
-      if (!res.ok || !json.success) {
-        throw new Error(json.message || "Server error");
-      }
-
-      const newId = json.id;
       setStatus("success");
       setMessage("Record created!");
       onCreate({
         ...form,
-        id: newId,
+        id: json.id,
         cipherText: dataB64,
         nonce: ivB64,
       });
@@ -719,7 +1249,6 @@ export default function AddRecordModal({ onClose, onCreate }) {
         <h2 className="text-2xl font-semibold text-purple-400 mb-6">
           Add New Record
         </h2>
-
         <AnimatePresence>
           {status !== "idle" && <StatusBanner />}
         </AnimatePresence>
@@ -743,15 +1272,34 @@ export default function AddRecordModal({ onClose, onCreate }) {
             placeholder="you@example.com"
             error={errors.email}
           />
-          <InputField
-            label="Password"
-            name="password"
-            type="password"
-            value={form.password}
-            onChange={handleChange}
-            placeholder="Strong password"
-            error={errors.password}
-          />
+
+          {/* Password input with show/hide toggle */}
+          <div className="relative">
+            <InputField
+              label="Password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              value={form.password}
+              onChange={handleChange}
+              placeholder="Strong password"
+              error={errors.password}
+              className="pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              className="absolute right-3 top-1/2 transform text-gray-400 hover:text-purple-400 transition"
+              tabIndex={-1}
+            >
+              {showPassword ? (
+                <EyeSlashIcon className="h-6 w-6" />
+              ) : (
+                <EyeIcon className="h-6 w-6" />
+              )}
+            </button>
+          </div>
+
           <InputField
             label="Website URL"
             name="url"
@@ -761,7 +1309,6 @@ export default function AddRecordModal({ onClose, onCreate }) {
             placeholder="https://example.com"
             error={errors.url}
           />
-
           <div className="flex flex-col">
             <label
               htmlFor="notes"
@@ -785,7 +1332,7 @@ export default function AddRecordModal({ onClose, onCreate }) {
             disabled={status === "submitting"}
             className="w-full py-2 bg-purple-700 hover:bg-purple-600 rounded-full font-semibold text-white transition duration-200 disabled:opacity-50"
           >
-            Create Record
+            {status === "submitting" ? "Saving…" : "Create Record"}
           </button>
         </form>
       </motion.div>

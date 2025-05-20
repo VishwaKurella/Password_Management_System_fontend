@@ -26,7 +26,7 @@ export default function InputField({
         id={name}
         name={name}
         type={type}
-        value={value}
+        value={value ?? ""}
         onChange={onChange}
         placeholder={placeholder}
         aria-invalid={!!error}
