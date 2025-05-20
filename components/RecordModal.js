@@ -970,6 +970,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { useUser } from "@/app/(main)/UserContext";
 
+const BACKEND_BASE = process.env.BACKEND_URI;
+
 // base64url helpers
 const toBase64Url = (buffer) => {
   const b64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
@@ -1036,7 +1038,7 @@ export default function RecordModal({ record, onClose, onUpdate, onDelete }) {
       const ivB64 = toBase64Url(iv);
 
       const { json } = await secureFetch(
-        "http://localhost:8080/api/request/update_entries",
+        `${BACKEND_BASE}/api/request/update_entries`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -1079,7 +1081,7 @@ export default function RecordModal({ record, onClose, onUpdate, onDelete }) {
 
     try {
       const { json } = await secureFetch(
-        "http://localhost:8080/api/request/delete_entries",
+        `${BACKEND_BASE}/api/request/delete_entries`,
         {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },

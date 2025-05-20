@@ -92,6 +92,8 @@ import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import InputField from "@/components/InputField";
 
+const BACKEND_BASE = process.env.BACKEND_URI;
+
 export default function OtpVerify() {
   const [otp, setOtp] = useState("");
   const [status, setStatus] = useState("idle");
@@ -111,7 +113,7 @@ export default function OtpVerify() {
     try {
       const form = { _id: id, secret: otp };
       console.log(form);
-      const res = await fetch("http://localhost:8080/api/verify/otp", {
+      const res = await fetch(`${BACKEND_BASE}/api/verify/otp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

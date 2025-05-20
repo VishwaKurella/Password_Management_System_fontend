@@ -93,6 +93,8 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { LockClosedIcon } from "@heroicons/react/24/outline";
 
+const BACKEND_BASE = process.env.BACKEND_URI;
+
 export default function AuthCallbackPage() {
   const router = useRouter();
   const [status, setStatus] = useState("pending");
@@ -119,18 +121,15 @@ export default function AuthCallbackPage() {
         if (!user_data) {
           throw new Error("Unable to login user. Please try again.");
         }
-        const authRes = await fetch(
-          `http://localhost:8080/api/auth/authenticate`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(user_data),
-            credentials: "include",
-            cache: "no-store",
-          }
-        );
+        const authRes = await fetch(`${BACKEND_BASE}/api/auth/authenticate`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(user_data),
+          credentials: "include",
+          cache: "no-store",
+        });
         const result = await authRes.json();
 
         if (!authRes.ok || !result.success) {

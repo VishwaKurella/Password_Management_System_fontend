@@ -236,6 +236,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { useUser } from "@/app/(main)/UserContext";
 
+const BACKEND_BASE = process.env.BACKEND_URI;
+
 // base64url helpers
 const toBase64Url = (buffer) => {
   const b64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
@@ -293,7 +295,7 @@ export default function MasterKeyVerifyModal() {
       const rawKeyBytes = await deriveKey(input, salt);
       const keyB64 = toBase64Url(rawKeyBytes.buffer);
       const { json } = await secureFetch(
-        "http://localhost:8080/api/verify/master_key",
+        `${BACKEND_BASE}/api/verify/master_key`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

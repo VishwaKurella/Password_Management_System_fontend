@@ -529,6 +529,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { useUser } from "@/app/(main)/UserContext";
 
+const BACKEND_BASE = process.env.BACKEND_URI;
+
 // base64url helpers
 const toBase64Url = (buffer) => {
   const b64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
@@ -597,11 +599,14 @@ export default function SetMasterKeyModal() {
       const keyB64 = toBase64Url(rawKeyBytes.buffer);
 
       console.log(keyB64);
-      const { json } = await secureFetch("/api/auth/set_master_key", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ salt: saltB64, master_key: keyB64 }),
-      });
+      const { json } = await secureFetch(
+        `${BACKEND_BASE}/api/auth/set_master_key`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ salt: saltB64, master_key: keyB64 }),
+        }
+      );
 
       if (!json.success) {
         if (json.is_expired) {

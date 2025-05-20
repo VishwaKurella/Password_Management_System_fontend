@@ -270,6 +270,8 @@ import {
   ShieldExclamationIcon,
 } from "@heroicons/react/24/outline";
 
+const BACKEND_BASE = process.env.BACKEND_URI;
+
 export default function ResetPasswordPage() {
   const router = useRouter();
   const { id } = useParams();
@@ -308,7 +310,7 @@ export default function ResetPasswordPage() {
     setStatus("submitting");
     setMessage("Resetting password...");
     try {
-      const res = await fetch("http://localhost:8080/api/auth/reset_password", {
+      const res = await fetch(`${BACKEND_BASE}/api/auth/reset_password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ _id: id, password }),

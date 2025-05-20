@@ -22,7 +22,7 @@
 // middleware.js
 import { NextResponse } from "next/server";
 
-const BACKEND_BASE = process.env.BACKEND_URL || "http://localhost:8080";
+const BACKEND_BASE = process.env.BACKEND_URI;
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl;

@@ -508,6 +508,8 @@ import OAuthBtn from "@/components/OAuthBtn";
 import Divider from "@/components/Divider";
 import InputField from "@/components/InputField";
 
+const BACKEND_BASE = process.env.BACKEND_URI;
+
 export default function SignInPage() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
@@ -569,7 +571,7 @@ export default function SignInPage() {
     try {
       setSubmitting(true);
       setApiError("");
-      const res = await fetch("http://localhost:8080/api/auth/signin", {
+      const res = await fetch(`${BACKEND_BASE}/api/auth/signin`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

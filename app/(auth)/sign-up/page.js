@@ -569,6 +569,8 @@ import {
   UserPlusIcon,
 } from "@heroicons/react/24/outline";
 
+const BACKEND_BASE = process.env.BACKEND_URI;
+
 export default function SignUpPage() {
   const [form, setForm] = useState({
     name: "",
@@ -615,7 +617,7 @@ export default function SignUpPage() {
         email: form.email.trim(),
         password: form.password.trim(),
       };
-      const res = await fetch(`http://localhost:8080/api/auth/signup`, {
+      const res = await fetch(`${BACKEND_BASE}/api/auth/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

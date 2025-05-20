@@ -1694,6 +1694,8 @@ async function decryptEntry(entry, keyBytes) {
   }
 }
 
+const BACKEND_BASE = process.env.BACKEND_URI;
+
 export default function DashboardPage() {
   const { key, secureFetch, masterKeySet, setMasterKeySet } = useUser();
   const [encryptedEntries, setEncryptedEntries] = useState([]);
@@ -1707,7 +1709,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!key) return;
     setLoading(true);
-    secureFetch("http://localhost:8080/api/request/get_entries", {
+    secureFetch(`${BACKEND_BASE}/api/request/get_entries`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

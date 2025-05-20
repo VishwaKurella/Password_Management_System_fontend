@@ -145,6 +145,8 @@ import React, {
 } from "react";
 import { useRouter } from "next/navigation";
 
+const BACKEND_BASE = process.env.BACKEND_URI;
+
 const UserContext = createContext(null);
 
 export function UserProvider({ children }) {
@@ -177,7 +179,7 @@ export function UserProvider({ children }) {
 
   // Fetch initial user metadata (salt, masterKeySet, user info)
   useEffect(() => {
-    secureFetch("http://localhost:8080/api/request/me", { method: "GET" })
+    secureFetch(`${BACKEND_BASE}/api/request/me`, { method: "GET" })
       .then(({ json }) => {
         if (json.is_expired) {
           setIsSessionExpired(true);

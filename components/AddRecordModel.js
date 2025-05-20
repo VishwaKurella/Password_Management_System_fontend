@@ -1070,6 +1070,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { useUser } from "@/app/(main)/UserContext";
 
+const BACKEND_BASE = process.env.BACKEND_URI;
+
 // base64url helpers
 const toBase64Url = (buffer) => {
   const b64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
@@ -1160,7 +1162,7 @@ export default function AddRecordModel({ onClose, onCreate }) {
       const ivB64 = toBase64Url(iv);
 
       const { json } = await secureFetch(
-        "http://localhost:8080/api/request/create_entries",
+        `${BACKEND_BASE}/api/request/create_entries`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -149,6 +149,8 @@ import {
 } from "@heroicons/react/24/outline";
 import InputField from "@/components/InputField";
 
+const BACKEND_BASE = process.env.BACKEND_URI;
+
 export default function ForgotPasswordPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -174,14 +176,11 @@ export default function ForgotPasswordPage() {
     setErrors({});
     setSubmitting(true);
     try {
-      const res = await fetch(
-        "http://localhost:8080/api/auth/forgot_password",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: email.trim().toLowerCase() }),
-        }
-      );
+      const res = await fetch(`${BACKEND_BASE}/api/auth/forgot_password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+      });
       const data = await res.json();
       if (!res.ok || !data.success) {
         setErrors({

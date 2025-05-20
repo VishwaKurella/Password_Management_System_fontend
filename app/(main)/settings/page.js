@@ -1261,6 +1261,8 @@ import {
 import { useUser } from "../UserContext";
 import { useRouter } from "next/navigation";
 
+const BACKEND_BASE = process.env.BACKEND_URI;
+
 export default function SettingsPage() {
   const { user, setUser, secureFetch } = useUser();
   // const [profileName, setProfileName] = useState(user?.name);
@@ -1288,7 +1290,7 @@ export default function SettingsPage() {
     setLoading(true);
     try {
       const { json } = await secureFetch(
-        "http://localhost:8080/api/request/change_name",
+        `${BACKEND_BASE}/api/request/change_name`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1310,7 +1312,7 @@ export default function SettingsPage() {
     setLoading(true);
     try {
       const { json } = await secureFetch(
-        "http://localhost:8080/api/request/change_password",
+        `${BACKEND_BASE}/api/request/change_password`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1336,7 +1338,7 @@ export default function SettingsPage() {
     setLoading(true);
     try {
       const { json } = await secureFetch(
-        "http://localhost:8080/api/request/delete_account",
+        `${BACKEND_BASE}/api/request/delete_account`,
         {
           method: "DELETE",
         }
