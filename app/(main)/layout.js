@@ -11,3 +11,5 @@ export default async function Layout({ children }) {
     </UserProvider>
   );
 }
+
+export const BACKEND_BASE = process.env.NEXT_PUBLIC_BACKEND_URI;

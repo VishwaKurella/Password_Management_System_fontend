@@ -1261,8 +1261,6 @@ import {
 import { useUser } from "../UserContext";
 import { useRouter } from "next/navigation";
 
-const BACKEND_BASE = process.env.BACKEND_URI;
-
 export default function SettingsPage() {
   const { user, setUser, secureFetch } = useUser();
   // const [profileName, setProfileName] = useState(user?.name);

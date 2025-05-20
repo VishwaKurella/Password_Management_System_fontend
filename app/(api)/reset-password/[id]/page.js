@@ -269,8 +269,7 @@ import {
   ShieldCheckIcon,
   ShieldExclamationIcon,
 } from "@heroicons/react/24/outline";
-
-const BACKEND_BASE = process.env.BACKEND_URI;
+const BACKEND_BASE = process.env.NEXT_PUBLIC_BACKEND_URI;
 
 export default function ResetPasswordPage() {
   const router = useRouter();

@@ -1,8 +1,7 @@
+const BACKEND_BASE = process.env.NEXT_PUBLIC_BACKEND_URI;
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
-
-const BACKEND_BASE = process.env.BACKEND_URI;
 
 export default async function Layout({ children, params }) {
   const { id } = await params;

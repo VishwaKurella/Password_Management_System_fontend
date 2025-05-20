@@ -92,8 +92,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { LockClosedIcon } from "@heroicons/react/24/outline";
-
-const BACKEND_BASE = process.env.BACKEND_URI;
+const BACKEND_BASE = process.env.NEXT_PUBLIC_BACKEND_URI;
 
 export default function AuthCallbackPage() {
   const router = useRouter();

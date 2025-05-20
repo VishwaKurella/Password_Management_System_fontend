@@ -1694,8 +1694,6 @@ async function decryptEntry(entry, keyBytes) {
   }
 }
 
-const BACKEND_BASE = process.env.BACKEND_URI;
-
 export default function DashboardPage() {
   const { key, secureFetch, masterKeySet, setMasterKeySet } = useUser();
   const [encryptedEntries, setEncryptedEntries] = useState([]);

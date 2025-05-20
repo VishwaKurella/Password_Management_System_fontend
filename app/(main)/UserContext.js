@@ -145,8 +145,6 @@ import React, {
 } from "react";
 import { useRouter } from "next/navigation";
 
-const BACKEND_BASE = process.env.BACKEND_URI;
-
 const UserContext = createContext(null);
 
 export function UserProvider({ children }) {

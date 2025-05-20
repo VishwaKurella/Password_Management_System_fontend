@@ -148,8 +148,7 @@ import {
   CheckCircleIcon,
 } from "@heroicons/react/24/outline";
 import InputField from "@/components/InputField";
-
-const BACKEND_BASE = process.env.BACKEND_URI;
+const BACKEND_BASE = process.env.NEXT_PUBLIC_BACKEND_URI;
 
 export default function ForgotPasswordPage() {
   const router = useRouter();

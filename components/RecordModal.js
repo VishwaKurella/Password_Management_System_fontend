@@ -969,8 +969,7 @@ import {
   EyeIcon,
 } from "@heroicons/react/24/outline";
 import { useUser } from "@/app/(main)/UserContext";
-
-const BACKEND_BASE = process.env.BACKEND_URI;
+const BACKEND_BASE = process.env.NEXT_PUBLIC_BACKEND_URI;
 
 // base64url helpers
 const toBase64Url = (buffer) => {
