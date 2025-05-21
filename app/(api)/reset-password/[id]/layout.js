@@ -1,4 +1,4 @@
-const BACKEND_BASE = process.env.NEXT_PUBLIC_BACKEND_URI;
+const BACKEND_BASE = "http://localhost:8080";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";

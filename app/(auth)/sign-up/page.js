@@ -568,7 +568,7 @@ import {
   ExclamationCircleIcon,
   UserPlusIcon,
 } from "@heroicons/react/24/outline";
-const BACKEND_BASE = process.env.NEXT_PUBLIC_BACKEND_URI;
+const BACKEND_BASE = "http://localhost:8080";
 
 export default function SignUpPage() {
   const [form, setForm] = useState({
@@ -589,18 +589,49 @@ export default function SignUpPage() {
     setErrors((errs) => ({ ...errs, [name]: "" }));
   };
 
+  // const validate = () => {
+  //   const errs = {};
+  //   if (!form.name.trim()) errs.name = "Name is required.";
+  //   if (!form.email.trim()) errs.email = "Email is required.";
+  //   else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(form.email))
+  //     errs.email = "Invalid email.";
+  //   if (!form.password) errs.password = "Password is required.";
+  //   else if (form.password.length < 8) errs.password = "Min 8 characters.";
+  //   else if (!/\d/.test(form.password) || !/[A-Z]/.test(form.password))
+  //     errs.password = "Include uppercase & number.";
+  //   else if (!/[!@#$%^&*(),.?":{}|<>]/.test(form.password))
+  //     errs.password = "Include a special character.";
+
+  //   if (form.confirmPassword !== form.password)
+  //     errs.confirmPassword = "Does not match.";
+  //   return errs;
+  // };
+
   const validate = () => {
     const errs = {};
+
     if (!form.name.trim()) errs.name = "Name is required.";
-    if (!form.email.trim()) errs.email = "Email is required.";
-    else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(form.email))
+
+    if (!form.email.trim()) {
+      errs.email = "Email is required.";
+    } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(form.email)) {
       errs.email = "Invalid email.";
-    if (!form.password) errs.password = "Password is required.";
-    else if (form.password.length < 8) errs.password = "Min 8 characters.";
-    else if (!/\d/.test(form.password) || !/[A-Z]/.test(form.password))
+    }
+
+    if (!form.password) {
+      errs.password = "Password is required.";
+    } else if (form.password.length < 8) {
+      errs.password = "Min 8 characters.";
+    } else if (!/\d/.test(form.password) || !/[A-Z]/.test(form.password)) {
       errs.password = "Include uppercase & number.";
-    if (form.confirmPassword !== form.password)
+    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(form.password)) {
+      errs.password = "Include a special character.";
+    }
+
+    if (form.confirmPassword !== form.password) {
       errs.confirmPassword = "Does not match.";
+    }
+
     return errs;
   };
 
@@ -653,7 +684,7 @@ export default function SignUpPage() {
       <div className="mb-6 text-center">
         <h1 className="text-4xl font-extrabold text-white">Sign Up</h1>
         <p className="mt-2 text-purple-300">
-          Create your VaultX account — it’s free.
+          Create your VaultX account — it's free.
         </p>
       </div>
 

@@ -507,7 +507,7 @@ import { useRouter } from "next/navigation";
 import OAuthBtn from "@/components/OAuthBtn";
 import Divider from "@/components/Divider";
 import InputField from "@/components/InputField";
-const BACKEND_BASE = process.env.NEXT_PUBLIC_BACKEND_URI;
+const BACKEND_BASE = "http://localhost:8080";
 
 export default function SignInPage() {
   const [form, setForm] = useState({ email: "", password: "" });

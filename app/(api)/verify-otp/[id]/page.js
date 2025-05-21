@@ -91,7 +91,7 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import InputField from "@/components/InputField";
-const BACKEND_BASE = process.env.NEXT_PUBLIC_BACKEND_URI;
+const BACKEND_BASE = "http://localhost:8080";
 
 export default function OtpVerify() {
   const [otp, setOtp] = useState("");

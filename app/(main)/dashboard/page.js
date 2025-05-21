@@ -1638,6 +1638,7 @@ import MasterKeyVerifyModal from "@/components/MasterKeyVerify";
 import { useUser } from "../UserContext";
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import SetMasterKeyModal from "@/components/SetMasterKeyModel";
+const BACKEND_BASE = "http://localhost:8080";
 
 function Loader() {
   return (

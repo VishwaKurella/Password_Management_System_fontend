@@ -144,6 +144,7 @@ import React, {
   useCallback,
 } from "react";
 import { useRouter } from "next/navigation";
+const BACKEND_BASE = "http://localhost:8080";
 
 const UserContext = createContext(null);
 

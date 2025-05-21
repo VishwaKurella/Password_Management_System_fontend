@@ -1260,6 +1260,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useUser } from "../UserContext";
 import { useRouter } from "next/navigation";
+const BACKEND_BASE = "http://localhost:8080";
 
 export default function SettingsPage() {
   const { user, setUser, secureFetch } = useUser();
